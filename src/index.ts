@@ -1,7 +1,16 @@
-console.log("Hello world!!!");
+import express from "express";
 
-function hello(_a: string, b: string) {
-  console.log(b);
+import { PORT } from "./const";
+import { createRoutes } from "./routes";
+
+async function main() {
+  const app = express();
+
+  app.use("/api/v1", createRoutes());
+
+  app.listen(PORT, () => {
+    console.log(`Server Started: (http://localhost:${PORT})`);
+  });
 }
 
-hello("1", "2");
+main();
