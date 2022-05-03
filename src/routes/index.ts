@@ -1,9 +1,9 @@
 import express from "express";
 
-import { createUserRoute } from "./user";
-import { createTestRoute } from "./test";
 import { Database } from "../db";
 import { Services } from "../services";
+import { createTestRoute } from "./test";
+import { createUserRoute } from "./user";
 
 interface CreateRouteDeps {
   services: Services;

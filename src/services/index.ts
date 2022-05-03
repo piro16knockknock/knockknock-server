@@ -1,5 +1,5 @@
-import { createTestService, TestService } from "./testService";
 import type { Database } from "../db";
+import { createTestService, TestService } from "./testService";
 
 export interface Services {
   testService: TestService;

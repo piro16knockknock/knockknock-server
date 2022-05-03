@@ -1,10 +1,10 @@
 import express from "express";
-
-import { PORT, DATABASE_URI } from "./const";
-import { createRoutes } from "./routes";
-import { createDatabase } from "./db";
-import { createServices } from "./services";
 import morgan from "morgan";
+
+import { DATABASE_URI, PORT } from "./const";
+import { createDatabase } from "./db";
+import { createRoutes } from "./routes";
+import { createServices } from "./services";
 
 async function main() {
   const app = express();

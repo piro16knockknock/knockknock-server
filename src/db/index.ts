@@ -1,4 +1,5 @@
 import { Kysely, MysqlDialect } from "kysely";
+
 import type { DatabaseSchema } from "./schema";
 
 export type Database = Kysely<DatabaseSchema>;
