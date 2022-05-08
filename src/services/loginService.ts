@@ -1,3 +1,7 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+import { PRIVATEKEY, SALTROUNDS } from "../const";
 import type { Database } from "../db";
 
 export interface LoginService {
@@ -12,24 +16,28 @@ interface loginServiceDeps {
 export function createLoginService({ db }: loginServiceDeps): LoginService {
   return {
     async isLogin(id, password) {
-      const ret = await db
-        .selectFrom("user")
-        .select(["name"])
-        .where("user_id", "=", id)
-        .where("password", "=", password)
-        .execute();
+      const ret = await db.selectFrom("user").select(["name", "password"]).where("user_id", "=", id).execute();
 
-      if (ret.length === 0) {
-        return null;
+      if (bcrypt.compareSync(password, ret[0].password)) {
+        const payload = {
+          tokenId: id,
+          name: ret[0].name,
+        };
+        const accessToken = jwt.sign(payload, PRIVATEKEY);
+        return accessToken;
       }
-      return ret[0].name;
+      return null;
     },
     async isJoin(id, password, name) {
-      const ret = await db.insertInto("user").values({ user_id: id, password: password, name: name }).execute();
-
-      if (ret.length === 0) {
+      const checkDuplicate = await db.selectFrom("user").select("user_id").where("user_id", "=", id).execute();
+      if (checkDuplicate.length !== 0) {
         return null;
       }
+
+      const hash = bcrypt.hashSync(password, SALTROUNDS);
+
+      const ret = await db.insertInto("user").values({ user_id: id, password: hash, name: name }).execute();
+
       return ret[0].insertId;
     },
   };

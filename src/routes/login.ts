@@ -15,9 +15,8 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
     asyncRoute(async (req, res) => {
       const id = req.body.id;
       const password = req.body.password;
-      const name = loginService.isLogin(id, password);
-      console.log(name);
-      res.json({ message: `로그인 되었습니다` });
+      const token = await loginService.isLogin(id, password);
+      res.json({ message: `로그인 되었습니다`, accessToken: token });
       return;
     }),
   ),
@@ -27,9 +26,9 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
         const id = req.body.id;
         const password = req.body.password;
         const name = req.body.name;
-        const isLogin = loginService.isJoin(id, password, name);
-        if (isLogin === null) {
-          res.json({ message: `회원가입 실패` });
+        const isJoin = loginService.isJoin(id, password, name);
+        if (isJoin === null) {
+          res.json({ message: `회원가입 실패 중복 아이디가 존재합니다.` });
           return;
         }
         res.json({ message: `회원가입 성공` });
