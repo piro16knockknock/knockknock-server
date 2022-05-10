@@ -26,9 +26,11 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
         const id = req.body.id;
         const password = req.body.password;
         const name = req.body.name;
-        const isJoin = loginService.isJoin(id, password, name);
+        const gender = req.body.gender;
+        const nickname = req.body.nickname;
+        const isJoin = loginService.isJoin(id, password, name, gender, nickname);
         if (isJoin === null) {
-          res.json({ message: `회원가입 실패 중복 아이디가 존재합니다.` });
+          res.json({ message: `회원가입 실패, 중복 아이디가 존재합니다.` });
           return;
         }
         res.json({ message: `회원가입 성공` });

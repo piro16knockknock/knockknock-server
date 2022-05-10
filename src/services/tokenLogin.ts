@@ -19,16 +19,16 @@ export function loginRequired() {
     }
 
     const tokenPayload = jwt.decode(accessToken, { complete: true })?.payload;
-    const tmp = (await loadPayload(tokenPayload)) as payloadInfo;
-    console.dir(tmp.id);
+    const userInfo = (await loadPayload(tokenPayload)) as payloadInfo;
+    console.dir(userInfo.id);
 
-    setUserId(req, tmp.id);
+    setUserId(req, userInfo.id, userInfo.name, userInfo.gender, userInfo.nickname);
     next();
   };
 }
 
-//netstat -a -o
-//taskkill /f /pid
+//netstat -a -o    모든포트 보기
+//taskkill /f /pid (번호)   포트 죽이기
 
 async function loadPayload(tokenPayload: string | jwt.JwtPayload | undefined) {
   if (tokenPayload === "undefined") {
@@ -47,23 +47,28 @@ async function tokenLogin(accessToken: string) {
 
 interface payloadInfo {
   id: string;
+  name: string;
+  gender: string;
+  nickname: string;
 }
 
 interface WithUserInfo {
   user: {
     id: string;
-    //name: string
+    name: string;
+    gender: string;
+    nickname: string;
   };
 }
 
-function setUserId(req: express.Request, userId: string) {
-  (req as unknown as WithUserInfo).user = { id: userId };
+function setUserId(req: express.Request, userId: string, userName: string, userGender: string, userNickname: string) {
+  (req as unknown as WithUserInfo).user = { id: userId, name: userName, gender: userGender, nickname: userNickname };
 }
 
-export function getUserId(req: express.Request) {
+export function getUserInfo(req: express.Request) {
   const user = (req as unknown as WithUserInfo).user;
   if (!user) {
     throw new Error("loginRequired() 없는데???");
   }
-  return user.id;
+  return user;
 }
