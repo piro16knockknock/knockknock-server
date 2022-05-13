@@ -3,6 +3,7 @@ import { Generated } from "kysely";
 export interface DatabaseSchema {
   test: Test;
   user: User;
+  Home: Home;
 }
 
 export interface Test {
