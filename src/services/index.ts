@@ -8,7 +8,6 @@ export interface Services {
   loginService: LoginService;
   homeService: HomeService;
 }
-
 interface CreateServiceDeps {
   db: Database;
 }
@@ -20,6 +19,6 @@ export function createServices({ db }: CreateServiceDeps): Services {
   return {
     testService,
     loginService,
-    homeService,
+    homeService
   };
 }
