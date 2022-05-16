@@ -19,6 +19,6 @@ export function createServices({ db }: CreateServiceDeps): Services {
   return {
     testService,
     loginService,
-    homeService
+    homeService,
   };
 }

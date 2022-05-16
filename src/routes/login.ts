@@ -10,6 +10,35 @@ export interface CreateLoginRouteDeps {
 export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
   const router = express.Router();
 
+  /**
+   * @swagger
+   * paths:
+   *   /login/login:
+   *     post:
+   *       tags:
+   *       - "login"
+   *       description: "로그인 하기"
+   *       parameters:
+   *       - name: "username"
+   *         in: "query"
+   *         description: "The user name for login"
+   *         required: true
+   *         type: "string"
+   *       - name: "password"
+   *         in: "query"
+   *         description: "The password for login in clear text"
+   *         required: true
+   *         type: "string"
+   *       responses:
+   *         "200":
+   *           description: 로그인 성공
+   *           schema:
+   *             type: object
+   *             properties:
+   *               accessToken:
+   *                 type: string
+   *                 description: accessToken
+   */
   router.post(
     "/login",
     asyncRoute(async (req, res) => {
