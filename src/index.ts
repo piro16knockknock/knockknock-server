@@ -15,6 +15,18 @@ const options = {
       title: "Hello World",
       version: "1.0.0",
     },
+    servers: [
+      {
+        url: `http://localhost:${process.env.PORT}`,
+      },
+    ],
+    securityDefinitions: {
+      api_key: {
+        type: "apiKey",
+        name: "jwt",
+        in: "header",
+      },
+    },
   },
   apis: ["./src/routes/*.ts"], // files containing annotations as above
 };

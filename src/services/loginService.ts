@@ -30,7 +30,7 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
 
       if (bcrypt.compareSync(password, ret[0].password)) {
         const payload = {
-          tokenId: id,
+          id: id,
           name: ret[0].name,
           gender: ret[0].gender,
           nickname: ret[0].nickname,
