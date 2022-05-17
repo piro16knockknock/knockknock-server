@@ -20,10 +20,12 @@ CREATE TABLE User
     `title_id`  INT,
     `test_id`   INT,
     PRIMARY key (`user_pk`),
-    FOREIGN KEY (`home_id`) REFERENCES `Home` (`home_id`),
+    FOREIGN KEY (`home_id`) REFERENCES `Home` (`home_id`)
+);
+/*
     FOREIGN KEY (`title_id`) REFERENCES `title` (`title_id`),
     FOREIGN KEY (`test_id`) REFERENCES `test_result` (`test_id`)
-);
+*/
 
 CREATE TABLE Alert
 (
