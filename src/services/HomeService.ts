@@ -3,13 +3,15 @@ import { Database } from "../db";
 export interface HomeService {
   getHomeInfo(id: number): Promise<HomeInfo>;
   postHomeInfo(Info: HomeInfo): Promise<number>;
-  updateHomeInfo(Info: HomeInfo): Promise<void>;
+  updateHomeInfo(Info: HomeInfo): Promise<bigint>;
+  deleteHome(id: number): Promise<bigint>;
 }
 
 interface HomeServiceDeps {
   db: Database;
 }
 interface HomeInfo {
+  Homeid: number;
   name: string;
   rentDate?: number;
   rentMonth?: number;
@@ -20,11 +22,12 @@ export function createHomeService({ db }: HomeServiceDeps): HomeService {
     async getHomeInfo(id) {
       const ret = await db
         .selectFrom("Home")
-        .select(["name", "rentDate", "rentMonth"])
+        .select(["home_id", "name", "rentDate", "rentMonth"])
         .where("home_id", "=", id)
         .execute();
 
       const curHomeInfo = {
+        Homeid: ret[0].home_id,
         name: ret[0].name,
         rentDate: ret[0].rentDate,
         rentMonth: ret[0].rentMonth,
@@ -51,10 +54,14 @@ export function createHomeService({ db }: HomeServiceDeps): HomeService {
       const updatedeRow = await db
         .updateTable("Home")
         .set({ name: info.name, rentDate: info.rentDate, rentMonth: info.rentMonth })
-        .where("Home.name", "=", Info.name)
+        .where("home_id", "=", info.Homeid)
         .executeTakeFirst();
-      console.log(`${updatedeRow} 번째 row가 변경 되었습니다.`);
-      return;
+
+      return updatedeRow.numUpdatedRows;
+    },
+    async deleteHome(id) {
+      const deletedHome = await db.deleteFrom("Home").where("home_id", "=", id).executeTakeFirst();
+      return deletedHome.numDeletedRows;
     },
   };
 }
