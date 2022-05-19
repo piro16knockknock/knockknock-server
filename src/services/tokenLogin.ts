@@ -1,5 +1,5 @@
-import express, { json } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import express from "express";
+import jwt from "jsonwebtoken";
 
 import { PRIVATEKEY } from "../const";
 

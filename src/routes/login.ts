@@ -38,6 +38,31 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
    *               accessToken:
    *                 type: string
    *                 description: accessToken
+   *   /login/join:
+   *     post:
+   *       tags:
+   *       - "login"
+   *       description: "회원가입 하기"
+   *       parameters:
+   *       - name: "id"
+   *         in: "query"
+   *         description: "아이디"
+   *         required: true
+   *         type: "string"
+   *       - name: "password"
+   *         in: "query"
+   *         description: "비밀번호"
+   *         required: true
+   *         type: "string"
+   *       responses:
+   *         "200":
+   *           description: 회원가입 성공
+   *           schema:
+   *             type: object
+   *             properties:
+   *               message:
+   *                 type: string
+   *                 description: 회원가입 성공 메세지
    */
   router.post(
     "/login",
@@ -45,7 +70,7 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
       const id = req.body.id;
       const password = req.body.password;
       const token = await loginService.isLogin(id, password);
-      res.json({ message: `로그인 되었습니다`, accessToken: token });
+      res.json({ accessToken: token });
       return;
     }),
   ),
