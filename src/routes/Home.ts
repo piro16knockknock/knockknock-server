@@ -1,5 +1,7 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 
+import { PRIVATEKEY } from "../const";
 import { HomeService } from "../services/HomeService";
 import { getUserInfo, loginRequired } from "../services/tokenLogin";
 import { asyncRoute } from "../utils/route";
@@ -18,7 +20,7 @@ export function createHomeRoute({ homeService }: CreateHomeRouteDeps) {
    *     get:
    *       tags:
    *       - "Home"
-   *       description: "집 정보 조회"
+   *       description: "내집 정보 조회"
    *       parameters:
    *       - name: "home_id"
    *         in: "query"
@@ -27,16 +29,18 @@ export function createHomeRoute({ homeService }: CreateHomeRouteDeps) {
    *         type: "number"
    *       responses:
    *         "200":
-   *           description: 로그인 성공
-   *           schema:
-   *             type: object
-   *             properties:
-   *               name:
-   *                 type: string
-   *               rentDate:
-   *                 type: number
-   *               rentMonth:
-   *                 type: number
+   *           description: "내집 조회 성공"
+   *           content:
+   *             application/json:
+   *               schema:
+   *                 type: object
+   *                 properties:
+   *                   name:
+   *                     type: string
+   *                   rentDate:
+   *                     type: number
+   *                   rentMonth:
+   *                     type: number
    *   /Home/postHome:
    *     post:
    *       tags:
@@ -59,29 +63,41 @@ export function createHomeRoute({ homeService }: CreateHomeRouteDeps) {
    *       responses:
    *         "200":
    *           description: 집 등록 성공
-   *           schema:
-   *             type: object
-   *             properties:
-   *               message:
-   *                 type: string
-   *                 description: 집등록 성공 메세지
+   *           content:
+   *             application/json:
+   *               schema:
+   *                 type: object
+   *                 properties:
+   *                   accessToken:
+   *                     type: string
    *
    */
-  router.get("/getHome", loginRequired(), (req, res) => {
-    const userInfo = getUserInfo(req);
+  router.get(
+    "/getHome",
+    loginRequired,
     asyncRoute(async (req, res) => {
-      const homeId = req.body.home_id;
+      const homeId = getUserInfo(req).HomeId;
+      if (homeId === undefined) {
+        res.json({ message: `등록된 집이 없어요` });
+        return;
+      }
       const homeInfo = homeService.getHomeInfo(homeId);
       res.json({ HomeInfo: homeInfo });
       return;
-    });
-  }),
+    }),
+  ),
     router.post(
       "/postHome",
+      loginRequired,
       asyncRoute(async (req, res) => {
         const homeInfo = req.body.homeInfo;
-        const homeId = homeService.postHomeInfo(homeInfo);
-        res.json({ message: `${homeId}번째 집으로 등록되었습니다.` });
+        const homeId = await homeService.postHomeInfo(homeInfo);
+
+        // 토큰 새로발급 (재발급)
+        const userInfo = getUserInfo(req);
+        userInfo.HomeId = homeId;
+        const token = jwt.sign(userInfo, PRIVATEKEY);
+        res.json({ message: `홈 정보가 변경된 토큰이 재발급 되었습니다.`, accessToken: token });
         return;
       }),
     );
