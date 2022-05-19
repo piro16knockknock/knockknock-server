@@ -16,6 +16,7 @@ export interface User {
   user_pk: Generated<number>;
   user_id: string;
   password: string;
+  HomeId?: number;
   name: string;
   gender?: string;
   nickname?: string;

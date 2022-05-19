@@ -1,6 +1,6 @@
 import express from "express";
 
-import { LoginService } from "../services/loginService";
+import { joinPayload, LoginService } from "../services/loginService";
 import { asyncRoute } from "../utils/route";
 
 export interface CreateLoginRouteDeps {
@@ -77,12 +77,17 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
     router.post(
       "/join",
       asyncRoute(async (req, res) => {
-        const id = req.body.id;
-        const password = req.body.password;
-        const name = req.body.name;
-        const gender = req.body.gender;
-        const nickname = req.body.nickname;
-        const isJoin = loginService.isJoin(id, password, name, gender, nickname);
+        const body = req.body;
+
+        const joinPayload: joinPayload = {
+          id: body.id,
+          password: body.password,
+          name: body.name,
+          gender: body.gender,
+          nickname: body.nickname,
+        };
+
+        const isJoin = loginService.isJoin(joinPayload);
         if (isJoin === null) {
           res.json({ message: `회원가입 실패, 중복 아이디가 존재합니다.` });
           return;

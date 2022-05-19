@@ -6,13 +6,15 @@ import type { Database } from "../db";
 
 export interface LoginService {
   isLogin(id: string, password: string): Promise<string | null>;
-  isJoin(
-    id: string,
-    password: string,
-    name: string,
-    gender: string,
-    nickname: string,
-  ): Promise<bigint | null | undefined>;
+  isJoin(joinPayload: joinPayload): Promise<bigint | null | undefined>;
+}
+
+export interface joinPayload {
+  id: string;
+  password: string;
+  name: string;
+  gender?: string;
+  nickname?: string;
 }
 
 interface loginServiceDeps {
@@ -24,7 +26,7 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
     async isLogin(id, password) {
       const ret = await db
         .selectFrom("user")
-        .select(["name", "password", "gender", "nickname"])
+        .select(["user_pk", "name", "password", "HomeId", "gender", "nickname"])
         .where("user_id", "=", id)
         .execute();
 
@@ -32,6 +34,7 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
         const payload = {
           id: id,
           name: ret[0].name,
+          HomeId: ret[0].HomeId,
           gender: ret[0].gender,
           nickname: ret[0].nickname,
         };
@@ -40,18 +43,28 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
       }
       return null;
     },
-    async isJoin(id, password, name, gender, nickname) {
-      const checkDuplicate = await db.selectFrom("user").select("user_id").where("user_id", "=", id).execute();
+    async isJoin(joinPayload) {
+      const checkDuplicate = await db
+        .selectFrom("user")
+        .select("user_id")
+        .where("user_id", "=", joinPayload.id)
+        .execute();
 
       if (checkDuplicate.length !== 0) {
         return null;
       }
 
-      const hash = bcrypt.hashSync(password, SALTROUNDS);
+      const hash = bcrypt.hashSync(joinPayload.password, SALTROUNDS);
 
       const ret = await db
         .insertInto("user")
-        .values({ user_id: id, password: hash, name: name, gender: gender, nickname: nickname })
+        .values({
+          user_id: joinPayload.id,
+          password: hash,
+          name: joinPayload.name,
+          gender: joinPayload.gender,
+          nickname: joinPayload.nickname,
+        })
         .execute();
 
       return ret[0].insertId;
