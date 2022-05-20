@@ -32,8 +32,7 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
 
       if (bcrypt.compareSync(password, ret[0].password)) {
         const payload = {
-          userPk: ret[0].user_pk,
-          userId: id,
+          id: id,
           name: ret[0].name,
         };
         const accessToken = jwt.sign(payload, PRIVATEKEY);

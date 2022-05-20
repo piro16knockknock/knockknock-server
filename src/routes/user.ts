@@ -7,9 +7,27 @@ export function createUserRoute() {
 
   router.get("/", loginRequired(), (req, res) => {
     const userId = getUserId(req);
-
+    /**
+     * @swagger
+     * paths:
+     *   /api/v1/user:
+     *     get:
+     *       tags:
+     *       - "user"
+     *       description: " 토큰로그인 결과"
+     *       security:
+     *          - jwt: []
+     *       responses:
+     *         "200":
+     *           description: 로그인 성공
+     * components:
+     *  securitySchemes:
+     *    jwt:
+     *      type: "apiKey"
+     *      name: "authorization"
+     *      in: "header"
+     */
     res.json({
-      message: "hello world!",
       userId,
     });
   });
