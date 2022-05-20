@@ -1,7 +1,8 @@
 import express from "express";
-import jwt from "jsonwebtoken";
 
+import jwt from "jsonwebtoken";
 import { PRIVATEKEY } from "../const";
+
 import { HomeService } from "../services/HomeService";
 import { getUserInfo, loginRequired } from "../services/tokenLogin";
 import { asyncRoute } from "../utils/route";
@@ -100,8 +101,28 @@ export function createHomeRoute({ homeService }: CreateHomeRouteDeps) {
         res.json({ message: `홈 정보가 변경된 토큰이 재발급 되었습니다.`, accessToken: token });
         return;
       }),
+    ),
+    //update
+    router.post(
+      "/updateHome",
+      asyncRoute(async (req, res) => {
+        const homeInfo = req.body.homeInfo;
+        const homeRow = homeService.updateHomeInfo(homeInfo);
+        res.json({ message: `${homeRow}번째 row가 변경 되었습니다.` });
+        return;
+      }),
     );
-  //update
+
+  //delete
+  router.delete(
+    "/deleteHome",
+    asyncRoute(async (req, res) => {
+      const homeId = req.body.userInfo.home_id;
+      const deletedHomeId = homeService.deleteHome(homeId);
+      res.json({ message: `${deletedHomeId}번째 집이 삭제 되었습니다.` });
+      return;
+    }),
+  );
 
   return router;
 }
