@@ -1,5 +1,5 @@
-import express, { json } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import express from "express";
+import jwt from "jsonwebtoken";
 
 import { PRIVATEKEY } from "../const";
 
@@ -22,7 +22,7 @@ export function loginRequired() {
     const userInfo = (await loadPayload(tokenPayload)) as payloadInfo;
     console.dir(userInfo.id);
 
-    setUserId(req, userInfo.id, userInfo.name, userInfo.gender, userInfo.nickname);
+    setUserInfo(req, userInfo);
     next();
   };
 }
@@ -45,24 +45,27 @@ async function tokenLogin(accessToken: string) {
   return null;
 }
 
-interface payloadInfo {
+export interface payloadInfo {
+  userPk: number;
   id: string;
+  HomeId?: number;
   name: string;
-  gender: string;
-  nickname: string;
+  gender?: string;
+  nickname?: string;
+}
+export interface WithUserInfo {
+  user: payloadInfo;
 }
 
-interface WithUserInfo {
-  user: {
-    id: string;
-    name: string;
-    gender: string;
-    nickname: string;
+function setUserInfo(req: express.Request, userInfo: payloadInfo) {
+  (req as unknown as WithUserInfo).user = {
+    userPk: userInfo.userPk,
+    id: userInfo.id,
+    HomeId: userInfo.HomeId,
+    name: userInfo.name,
+    gender: userInfo.gender,
+    nickname: userInfo.nickname,
   };
-}
-
-function setUserId(req: express.Request, userId: string, userName: string, userGender: string, userNickname: string) {
-  (req as unknown as WithUserInfo).user = { id: userId, name: userName, gender: userGender, nickname: userNickname };
 }
 
 export function getUserInfo(req: express.Request) {
