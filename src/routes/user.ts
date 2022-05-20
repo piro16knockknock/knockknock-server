@@ -1,12 +1,12 @@
 import express from "express";
 
-import { getUserInfo, loginRequired } from "../services/tokenLogin";
+import { getUserId, loginRequired } from "../services/tokenLogin";
 
 export function createUserRoute() {
   const router = express.Router();
 
   router.get("/", loginRequired(), (req, res) => {
-    const userInfo = getUserInfo(req);
+    const userId = getUserId(req);
     /**
      * @swagger
      * paths:
@@ -28,7 +28,7 @@ export function createUserRoute() {
      *      in: "header"
      */
     res.json({
-      userInfo,
+      userId,
     });
   });
 

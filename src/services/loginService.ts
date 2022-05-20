@@ -26,7 +26,7 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
     async isLogin(id, password) {
       const ret = await db
         .selectFrom("user")
-        .select(["user_pk", "name", "password", "HomeId", "gender", "nickname"])
+        .select(["user_pk", "name", "password"])
         .where("user_id", "=", id)
         .execute();
 
@@ -34,9 +34,6 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
         const payload = {
           id: id,
           name: ret[0].name,
-          HomeId: ret[0].HomeId,
-          gender: ret[0].gender,
-          nickname: ret[0].nickname,
         };
         const accessToken = jwt.sign(payload, PRIVATEKEY);
         return accessToken;
