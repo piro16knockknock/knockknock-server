@@ -1,8 +1,13 @@
 import express from "express";
 
 import { getUserId, loginRequired } from "../services/tokenLogin";
+import { UserService } from "../services/userService";
 
-export function createUserRoute() {
+export interface CreateUserRouteDeps {
+  userService: UserService;
+}
+
+export function createUserRoute({ userService }: CreateUserRouteDeps) {
   const router = express.Router();
 
   router.get("/", loginRequired(), (req, res) => {
@@ -31,6 +36,15 @@ export function createUserRoute() {
       userId,
     });
   });
-
+  router.get("/userInfo", loginRequired(), (req, res) => {
+    const userId = getUserId(req);
+    const userInfo = userService.getUserInfo(userId.userPk);
+    res.json(userInfo);
+  });
+  router.post("/userUpdate", loginRequired(), (req, _res) => {
+    const userpk = getUserId(req).userPk;
+    const info = req.body;
+    userService.setUserInfo(userpk, info);
+  });
   return router;
 }

@@ -3,7 +3,7 @@ import { Database } from "../db";
 export interface HomeService {
   getHomeInfo(id: number): Promise<HomeInfo>;
   postHomeInfo(Info: HomeInfo): Promise<number>;
-  updateHomeInfo(Info: HomeInfo): Promise<bigint>;
+  updateHomeInfo(homeId: number, Info: HomeInfo): Promise<bigint>;
   deleteHome(id: number): Promise<bigint>;
 }
 
@@ -16,14 +16,19 @@ interface HomeInfo {
   rentDate?: number;
   rentMonth?: number;
 }
+interface updateHomeInfo {
+  name?: string;
+  rentDate?: number;
+  rentMonth?: number;
+}
 
 export function createHomeService({ db }: HomeServiceDeps): HomeService {
   return {
-    async getHomeInfo(id) {
+    async getHomeInfo(homeId) {
       const ret = await db
         .selectFrom("Home")
         .select(["home_id", "name", "rentDate", "rentMonth"])
-        .where("home_id", "=", id)
+        .where("home_id", "=", homeId)
         .execute();
 
       const curHomeInfo = {
@@ -48,13 +53,11 @@ export function createHomeService({ db }: HomeServiceDeps): HomeService {
         .executeTakeFirstOrThrow();
       return postedHome.home_id;
     },
-    async updateHomeInfo(Info: HomeInfo) {
-      const info = Info;
-
+    async updateHomeInfo(homeId: number, Info: updateHomeInfo) {
       const updatedeRow = await db
         .updateTable("Home")
-        .set({ name: info.name, rentDate: info.rentDate, rentMonth: info.rentMonth })
-        .where("home_id", "=", info.Homeid)
+        .set({ name: Info.name, rentDate: Info.rentDate, rentMonth: Info.rentMonth })
+        .where("home_id", "=", homeId)
         .executeTakeFirst();
 
       return updatedeRow.numUpdatedRows;
