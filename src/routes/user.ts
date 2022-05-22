@@ -15,7 +15,7 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
     /**
      * @swagger
      * paths:
-     *   /api/v1/user:
+     *   /user:
      *     get:
      *       tags:
      *       - "user"
@@ -25,6 +25,52 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
      *       responses:
      *         "200":
      *           description: 로그인 성공
+     *   /user/userInfo:
+     *     get:
+     *       tags:
+     *       - "user"
+     *       description: "내 유저정보 불러오기"
+     *       security:
+     *         - jwt: []
+     *       responses:
+     *         "200":
+     *           description: 유저 정보 불러오기 성공
+     *           content:
+     *             application/json:
+     *               schema:
+     *                 type: object
+     *                 properties:
+     *                      HomeId:
+     *                        type: number
+     *                      gender:
+     *                        type: string
+     *                      nickname:
+     *                        type: string
+     *   /user/userUpdate:
+     *     post:
+     *       tags:
+     *       - "user"
+     *       description: "유저 정보 수정"
+     *       security:
+     *         - jwt: []
+     *       parameters:
+     *       - name: "userInfo"
+     *         in: body
+     *         description: 수정할 유저 정보
+     *         schema:
+     *           type: object
+     *           properties:
+     *             HomeId:
+     *               type: number
+     *             gender:
+     *               type: string
+     *             nickname:
+     *               type: string
+     *       responses:
+     *         "200":
+     *           description: "유저 정보 수정 성공"
+     *
+     *
      * components:
      *  securitySchemes:
      *    jwt:
@@ -43,7 +89,7 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
   });
   router.post("/userUpdate", loginRequired(), (req, _res) => {
     const userpk = getUserId(req).userPk;
-    const info = req.body;
+    const info = req.body.userInfo;
     userService.setUserInfo(userpk, info);
   });
   return router;

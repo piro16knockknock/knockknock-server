@@ -21,12 +21,8 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *       tags:
    *       - "Home"
    *       description: "내집 정보 조회"
-   *       parameters:
-   *       - name: "home_id"
-   *         in: "query"
-   *         description: "집 아이디 "
-   *         required: true
-   *         type: "number"
+   *       security:
+   *         - jwt: []
    *       responses:
    *         "200":
    *           description: "내집 조회 성공"
@@ -46,6 +42,8 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *       tags:
    *       - "Home"
    *       description: "집 정보 입력"
+   *       security:
+   *         - jwt: []
    *       parameters:
    *       - name: "homeInfo"
    *         in: "body"
@@ -68,8 +66,9 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *               schema:
    *                 type: object
    *                 properties:
-   *                   accessToken:
+   *                   message:
    *                     type: string
+   *                     description: "집 등록 성공 메세지"
    *
    */
   router.get(

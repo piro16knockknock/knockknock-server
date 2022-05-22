@@ -1,3 +1,4 @@
+import cors from "cors";
 import express from "express";
 import morgan from "morgan";
 import swaggerJsdoc from "swagger-jsdoc";
@@ -17,7 +18,7 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT}`,
+        url: `http://localhost:${process.env.PORT}/api/v1`,
       },
     ],
     securityDefinitions: {
@@ -41,6 +42,7 @@ async function main() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan("dev"));
+  app.use(cors());
 
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiSpecification, { explorer: true }));
 
