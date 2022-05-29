@@ -13,7 +13,7 @@ knock 🏡
 
 ```json
 {
-  "name": "melon-server",
+  "name": "knockknock-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
