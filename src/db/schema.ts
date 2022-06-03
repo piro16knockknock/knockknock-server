@@ -4,6 +4,8 @@ export interface DatabaseSchema {
   test: Test;
   user: User;
   Home: Home;
+  TodoCategory: TodoCategory;
+  Todo: Todo;
 }
 
 export interface Test {
@@ -27,4 +29,18 @@ export interface Home {
   name: string;
   rentDate?: number;
   rentMonth?: number;
+}
+
+export interface TodoCategory {
+  cateId: Generated<number>;
+  name: string;
+  homeId: number;
+}
+export interface Todo {
+  todoId: Generated<number>;
+  todoContent: string;
+  date: string;
+  cateId: number;
+  userPk: number;
+  isComplete: boolean;
 }

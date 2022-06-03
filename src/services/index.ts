@@ -2,6 +2,7 @@ import type { Database } from "../db";
 import { createHomeService, HomeService } from "./HomeService";
 import { createLoginService, LoginService } from "./loginService";
 import { createTestService, TestService } from "./testService";
+import { createTodoService, TodoService } from "./TodoService";
 import { createUserService, UserService } from "./userService";
 
 export interface Services {
@@ -9,6 +10,7 @@ export interface Services {
   loginService: LoginService;
   homeService: HomeService;
   UserService: UserService;
+  TodoService: TodoService;
 }
 interface CreateServiceDeps {
   db: Database;
@@ -19,10 +21,12 @@ export function createServices({ db }: CreateServiceDeps): Services {
   const loginService = createLoginService({ db });
   const homeService = createHomeService({ db });
   const UserService = createUserService({ db });
+  const TodoService = createTodoService({ db });
   return {
     testService,
     loginService,
     homeService,
     UserService,
+    TodoService,
   };
 }
