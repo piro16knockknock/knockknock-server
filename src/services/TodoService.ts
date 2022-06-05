@@ -1,8 +1,9 @@
 import { Database } from "../db";
 
 export interface TodoService {
-  getTodoList(userPk: number): Promise<todoList>;
-  postTodoList(): Promise<void>;
+  getTodoList(userPk: number): Promise<todoList[]>;
+  postTodo(todoInfo: todoList): Promise<number>;
+  deleteTodo(todoId: number): Promise<bigint>;
 }
 
 interface TodoServiceDeps {
@@ -10,12 +11,21 @@ interface TodoServiceDeps {
 }
 
 interface todoList {
-  todoId: number;
+  todoId?: number;
   todoContent: string;
   date: string;
   cateId: number;
   userPk: number;
   isComplete: boolean;
+}
+
+interface updateTodoList {
+  todoId: number;
+  todoContent?: string;
+  date?: string;
+  cateId?: number;
+  userPk?: number;
+  isComplete?: boolean;
 }
 
 export function createTodoService({ db }: TodoServiceDeps): TodoService {
@@ -29,19 +39,38 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
         .where("userPk", "=", userPk)
         .execute();
 
-      const List = {
-        todoId: ret[0].todoId,
-        todoContent: ret[0].todoContent,
-        date: ret[0].date,
-        cateId: ret[0].cateId,
-        userPk: ret[0].userPk,
-        isComplete: ret[0].isComplete,
-      };
+      const list: todoList[] = [];
+      for (const s of ret) {
+        const tmp = {
+          todoId: s.todoId,
+          todoContent: s.todoContent,
+          date: s.date,
+          cateId: s.cateId,
+          userPk: s.userPk,
+          isComplete: s.isComplete,
+        };
+        list.push(tmp);
+      }
 
-      return List;
+      return list;
     },
-    async postTodoList() {
-      return;
+    async postTodo(todoInfo) {
+      const postTodoId = await db
+        .insertInto("Todo")
+        .values({
+          todoContent: todoInfo.todoContent,
+          date: todoInfo.date,
+          cateId: todoInfo.cateId,
+          userPk: todoInfo.userPk,
+          isComplete: todoInfo.isComplete,
+        })
+        .returning("todoId")
+        .executeTakeFirstOrThrow();
+      return postTodoId.todoId;
+    },
+    async deleteTodo(todoId) {
+      const deleteTodo = await db.deleteFrom("Todo").where("todoId", "=", todoId).executeTakeFirst();
+      return deleteTodo.numDeletedRows;
     },
   };
 }

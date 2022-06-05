@@ -17,9 +17,9 @@ export function createRoutes({ services }: CreateRouteDeps) {
   router.use("/user", createUserRoute({ userService: services.UserService }));
   router.use("/test", createTestRoute({ testService: services.testService }));
   router.use("/login", createLoginRoute({ loginService: services.loginService }));
-  router.use("/Home", createHomeRoute({ homeService: services.homeService, userService: services.UserService }));
+  router.use("/home", createHomeRoute({ homeService: services.homeService, userService: services.UserService }));
 
-  router.use("/Todo", createTodoRoute({ TodoService: services.TodoService }));
+  router.use("/todo", createTodoRoute({ TodoService: services.TodoService }));
 
   return router;
 }

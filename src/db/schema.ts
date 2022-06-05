@@ -27,8 +27,8 @@ export interface User {
 export interface Home {
   home_id: Generated<number>;
   name: string;
-  rentDate?: number;
-  rentMonth?: number;
+  rent_date?: number;
+  rent_month?: number;
 }
 
 export interface TodoCategory {

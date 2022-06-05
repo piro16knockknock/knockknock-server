@@ -1,4 +1,5 @@
 import express from "express";
+import zod from "zod";
 
 import { HomeService } from "../services/HomeService";
 import { getUserId, loginRequired } from "../services/tokenLogin";
@@ -16,7 +17,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
   /**
    * @swagger
    * paths:
-   *   /Home/getHome:
+   *   /home/gethome:
    *     get:
    *       tags:
    *       - "Home"
@@ -37,7 +38,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *                     type: number
    *                   rentMonth:
    *                     type: number
-   *   /Home/postHome:
+   *   /home/posthome:
    *     post:
    *       tags:
    *       - "Home"
@@ -72,7 +73,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *
    */
   router.get(
-    "/getHome",
+    "/gethome",
     loginRequired,
     asyncRoute(async (req, res) => {
       // 할일
@@ -95,11 +96,20 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
     }),
   );
   router.post(
-    "/postHome",
-    loginRequired,
+    "/posthome",
+    loginRequired(),
     asyncRoute(async (req, res) => {
       const userPk = getUserId(req).userPk;
-      const homeInfo = req.body.homeInfo;
+      console.log(req.body);
+
+      const validator = zod.object({
+        name: zod.string(),
+        rentDate: zod.number().optional(),
+        rentMonth: zod.number().optional(),
+      });
+
+      const homeInfo = validator.parse(req.body);
+
       const homeId = await homeService.postHomeInfo(homeInfo);
 
       userService.setUserInfo(userPk, { HomeId: homeId });
