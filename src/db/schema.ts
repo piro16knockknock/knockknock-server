@@ -39,7 +39,7 @@ export interface TodoCategory {
 export interface Todo {
   todoId: Generated<number>;
   todoContent: string;
-  date: string;
+  date: number;
   cateId: number;
   userPk: number;
   isComplete: boolean;
