@@ -73,28 +73,30 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
       res.json({ accessToken: token });
       return;
     }),
-  ),
-    router.post(
-      "/join",
-      asyncRoute(async (req, res) => {
-        const body = req.body;
+  );
 
-        const joinPayload: joinPayload = {
-          id: body.id,
-          password: body.password,
-          name: body.name,
-          gender: body.gender,
-          nickname: body.nickname,
-        };
+  router.post(
+    "/join",
+    asyncRoute(async (req, res) => {
+      const body = req.body;
 
-        const isJoin = loginService.isJoin(joinPayload);
-        if (isJoin === null) {
-          res.json({ message: `회원가입 실패, 중복 아이디가 존재합니다.` });
-          return;
-        }
-        res.json({ message: `회원가입 성공` });
+      const joinPayload: joinPayload = {
+        id: body.id,
+        password: body.password,
+        name: body.name,
+        gender: body.gender,
+        nickname: body.nickname,
+      };
+
+      const isJoin = await loginService.isJoin(joinPayload);
+      if (isJoin === null) {
+        res.status(403).json({ message: `회원가입 실패, 중복 아이디가 존재합니다.` });
         return;
-      }),
-    );
+      }
+      res.json({ message: `회원가입 성공`, isJoin });
+      return;
+    }),
+  );
+
   return router;
 }
