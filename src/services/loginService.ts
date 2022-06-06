@@ -1,12 +1,14 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { PRIVATEKEY, SALTROUNDS } from "../const";
+import { PRIVATEKEY } from "../const";
 import type { Database } from "../db";
+
+const SALTROUNDS = 11;
 
 export interface LoginService {
   isLogin(id: string, password: string): Promise<string | null>;
-  isJoin(joinPayload: joinPayload): Promise<bigint | null | undefined>;
+  isJoin(joinPayload: joinPayload): Promise<number | null>;
 }
 
 export interface joinPayload {
@@ -32,6 +34,7 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
 
       if (bcrypt.compareSync(password, ret[0].password)) {
         const payload = {
+          userPk: ret[0].user_pk,
           id: id,
           name: ret[0].name,
         };
@@ -51,6 +54,8 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
         return null;
       }
 
+      console.log(joinPayload.password, typeof joinPayload.password);
+
       const hash = bcrypt.hashSync(joinPayload.password, SALTROUNDS);
 
       const ret = await db
@@ -64,7 +69,7 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
         })
         .execute();
 
-      return ret[0].insertId;
+      return Number(ret[0].insertId);
     },
   };
 }
