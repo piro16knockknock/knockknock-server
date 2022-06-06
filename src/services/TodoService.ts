@@ -3,7 +3,8 @@ import { Database } from "../db";
 export interface TodoService {
   getTodoList(userPk: number): Promise<todoList[]>;
   postTodo(todoInfo: todoList): Promise<number>;
-  deleteTodo(todoId: number): Promise<bigint>;
+  deleteTodo(todoId: number): Promise<number>;
+  updateTodo(todoInfo: updateTodoList): Promise<number>;
 }
 
 interface TodoServiceDeps {
@@ -13,7 +14,7 @@ interface TodoServiceDeps {
 interface todoList {
   todoId?: number;
   todoContent: string;
-  date: string;
+  date: number;
   cateId: number;
   userPk: number;
   isComplete: boolean;
@@ -22,7 +23,7 @@ interface todoList {
 interface updateTodoList {
   todoId: number;
   todoContent?: string;
-  date?: string;
+  date?: number;
   cateId?: number;
   userPk?: number;
   isComplete?: boolean;
@@ -68,9 +69,24 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
         .executeTakeFirstOrThrow();
       return postTodoId.todoId;
     },
+    async updateTodo(Info) {
+      const updatedeRow = await db
+        .updateTable("Todo")
+        .set({
+          todoContent: Info.todoContent,
+          date: Info.date,
+          cateId: Info.cateId,
+          userPk: Info.userPk,
+          isComplete: Info.isComplete,
+        })
+        .where("todoId", "=", Info.todoId)
+        .executeTakeFirst();
+
+      return Number(updatedeRow.numUpdatedRows);
+    },
     async deleteTodo(todoId) {
       const deleteTodo = await db.deleteFrom("Todo").where("todoId", "=", todoId).executeTakeFirst();
-      return deleteTodo.numDeletedRows;
+      return Number(deleteTodo.numDeletedRows);
     },
   };
 }

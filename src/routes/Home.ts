@@ -74,7 +74,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    */
   router.get(
     "/gethome",
-    loginRequired,
+    loginRequired(),
     asyncRoute(async (req, res) => {
       // 할일
       // userService 만들어서 유저 정보조회하기 이런거 몰아넣기
@@ -121,7 +121,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
   //update
   router.post(
     "/updateHome",
-    loginRequired,
+    loginRequired(),
     asyncRoute(async (req, res) => {
       const userPk = getUserId(req).userPk;
       const homeInfo = req.body.homeInfo;
@@ -139,7 +139,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
   //delete 살고있는 집 삭제
   router.delete(
     "/deleteHome",
-    loginRequired,
+    loginRequired(),
     asyncRoute(async (req, res) => {
       const userPk = getUserId(req).userPk;
       const userInfo = await userService.getUserInfo(userPk);

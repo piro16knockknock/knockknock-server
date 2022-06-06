@@ -3,8 +3,8 @@ import { Database } from "../db";
 export interface HomeService {
   getHomeInfo(id: number): Promise<HomeInfo>;
   postHomeInfo(Info: HomeInfo): Promise<number>;
-  updateHomeInfo(homeId: number, Info: HomeInfo): Promise<bigint>;
-  deleteHome(id: number): Promise<bigint>;
+  updateHomeInfo(homeId: number, Info: HomeInfo): Promise<number>;
+  deleteHome(id: number): Promise<number>;
 }
 
 interface HomeServiceDeps {
@@ -58,11 +58,11 @@ export function createHomeService({ db }: HomeServiceDeps): HomeService {
         .where("home_id", "=", homeId)
         .executeTakeFirst();
 
-      return updatedeRow.numUpdatedRows;
+      return Number(updatedeRow.numUpdatedRows);
     },
     async deleteHome(id) {
       const deletedHome = await db.deleteFrom("Home").where("home_id", "=", id).executeTakeFirst();
-      return deletedHome.numDeletedRows;
+      return Number(deletedHome.numDeletedRows);
     },
   };
 }
