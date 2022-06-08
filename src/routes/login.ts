@@ -18,17 +18,11 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
    *       tags:
    *       - "login"
    *       description: "로그인 하기"
-   *       parameters:
-   *       - name: "username"
-   *         in: "query"
-   *         description: "The user name for login"
-   *         required: true
-   *         type: "string"
-   *       - name: "password"
-   *         in: "query"
-   *         description: "The password for login in clear text"
-   *         required: true
-   *         type: "string"
+   *       requestBody:
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#definitions/loginInfo"
    *       responses:
    *         "200":
    *           description: 로그인 성공
@@ -36,24 +30,17 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
    *             type: object
    *             properties:
    *               accessToken:
-   *                 type: string
-   *                 description: accessToken
+   *                 type: "string"
    *   /login/join:
    *     post:
    *       tags:
    *       - "login"
-   *       description: "회원가입 하기"
-   *       parameters:
-   *       - name: "id"
-   *         in: "query"
-   *         description: "아이디"
-   *         required: true
-   *         type: "string"
-   *       - name: "password"
-   *         in: "query"
-   *         description: "비밀번호"
-   *         required: true
-   *         type: "string"
+   *       description: "회원가입 하기 / gender와 nickname은 필수 아님"
+   *       requestBody:
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#definitions/joinUser"
    *       responses:
    *         "200":
    *           description: 회원가입 성공
@@ -63,12 +50,37 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
    *               message:
    *                 type: string
    *                 description: 회원가입 성공 메세지
+   *
+   *
+   * definitions:
+   *   joinUser:
+   *     type: object
+   *     properties:
+   *       id:
+   *         type: "string"
+   *       password:
+   *         type: "string"
+   *       name:
+   *         type: "string"
+   *       gender:
+   *         type: "string"
+   *       nickname:
+   *         type: "string"
+   *
+   *   loginInfo:
+   *     type: object
+   *     properties:
+   *       id:
+   *         type: "string"
+   *       password:
+   *         type: "string"
    */
   router.post(
     "/login",
     asyncRoute(async (req, res) => {
       const id = req.body.id;
       const password = req.body.password;
+      console.log(req.body);
       const token = await loginService.isLogin(id, password);
       res.json({ accessToken: token });
       return;

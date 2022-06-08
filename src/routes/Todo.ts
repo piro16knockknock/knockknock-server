@@ -28,7 +28,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
         return;
       }
 
-      res.json({ TodoList: List });
+      res.json({ todoList: List });
       return;
     }),
   );
@@ -85,7 +85,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     loginRequired(),
     asyncRoute(async (req, res) => {
       const validator = zod.number();
-      const todoId = validator.parse(req.body);
+      const todoId = validator.parse(req.body.todoId);
       const rownum = await TodoService.deleteTodo(todoId);
 
       if (rownum == undefined) {
@@ -99,3 +99,121 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
 
   return router;
 }
+
+/**
+ * @swagger
+ * paths:
+ *   /todo/gettodolist:
+ *     get:
+ *       tags:
+ *       - "todo"
+ *       description: "할일 조회"
+ *       security:
+ *         - jwt: []
+ *       responses:
+ *         "200":
+ *           description: "할일 조회 성공"
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   todoList:
+ *                     type: array
+ *                     items:
+ *                       $ref: "#definitions/todoInfo"
+ *   /todo/posttodo:
+ *     post:
+ *       tags:
+ *       - "todo"
+ *       description: "추가할 할일 정보 입력"
+ *       security:
+ *         - jwt: []
+ *       requestBody:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#definitions/todoInfo"
+ *       responses:
+ *         "200":
+ *           description: 집 등록 성공
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                     example: "집이 등록되었습니다."
+ *
+ *   /todo/updatetodo:
+ *     post:
+ *       tags:
+ *       - "todo"
+ *       description: "할일 수정"
+ *       security:
+ *         - jwt: []
+ *       requestBody:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#definitions/todoInfo"
+ *       responses:
+ *         "200":
+ *           description: 할일 수정 성공
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                     example: "?번째 row가 변경 되었습니다."
+ *   /todo/deletetodo:
+ *     delete:
+ *       tags:
+ *       - "todo"
+ *       description: "할일 삭제"
+ *       security:
+ *         - jwt: []
+ *       requestBody:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 todoId:
+ *                   type: number
+ *
+ *       responses:
+ *         "200":
+ *           description: 할일 삭제 성공
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                     example: "?번째 줄 집이 삭제 되었습니다."
+ *
+ *
+ *
+ * definitions:
+ *   todoInfo:
+ *     type: object
+ *     properties:
+ *       todoId:
+ *         type: number
+ *       todoContent:
+ *         type: string
+ *       date:
+ *         type: number
+ *         example: "20220601"
+ *       cateId:
+ *         type: number
+ *       userPk:
+ *         type: number
+ *       isComplete:
+ *         type: boolean
+ */

@@ -45,20 +45,18 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *       description: "집 정보 입력"
    *       security:
    *         - jwt: []
-   *       parameters:
-   *       - name: "homeInfo"
-   *         in: "body"
-   *         description: "집정보"
-   *         required: true
-   *         schema:
-   *           type: "object"
-   *           properties:
-   *             name:
-   *               type: string
-   *             rentDate:
-   *               type: number
-   *             rentMonth:
-   *               type: number
+   *       requestBody:
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: "object"
+   *               properties:
+   *                 name:
+   *                   type: string
+   *                 rentDate:
+   *                   type: number
+   *                 rentMonth:
+   *                   type: number
    *       responses:
    *         "200":
    *           description: 집 등록 성공
@@ -69,8 +67,56 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *                 properties:
    *                   message:
    *                     type: string
-   *                     description: "집 등록 성공 메세지"
+   *                     description: "집이 등록되었습니다."
    *
+   *   /home/updateHome:
+   *     post:
+   *       tags:
+   *       - "Home"
+   *       description: "집 정보 수정"
+   *       security:
+   *         - jwt: []
+   *       requestBody:
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: "object"
+   *               properties:
+   *                 name:
+   *                   type: string
+   *                 rentDate:
+   *                   type: number
+   *                 rentMonth:
+   *                   type: number
+   *       responses:
+   *         "200":
+   *           description: 집 정보 수정 성공
+   *           content:
+   *             application/json:
+   *               schema:
+   *                 type: object
+   *                 properties:
+   *                   message:
+   *                     type: string
+   *                     description: "?번째 row가 변경 되었습니다."
+   *   /home/deleteHome:
+   *     delete:
+   *       tags:
+   *       - "Home"
+   *       description: "집 정보 삭제"
+   *       security:
+   *         - jwt: []
+   *       responses:
+   *         "200":
+   *           description: 집 정보 삭제 성공
+   *           content:
+   *             application/json:
+   *               schema:
+   *                 type: object
+   *                 properties:
+   *                   message:
+   *                     type: string
+   *                     description: "?번째 줄 집이 삭제 되었습니다."
    */
   router.get(
     "/gethome",

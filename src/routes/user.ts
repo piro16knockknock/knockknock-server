@@ -53,23 +53,46 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
      *       description: "유저 정보 수정"
      *       security:
      *         - jwt: []
-     *       parameters:
-     *       - name: "userInfo"
-     *         in: body
-     *         description: 수정할 유저 정보
-     *         schema:
-     *           type: object
-     *           properties:
-     *             HomeId:
-     *               type: number
-     *             gender:
-     *               type: string
-     *             nickname:
-     *               type: string
+     *       requestBody:
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 HomeId:
+     *                   type: number
+     *                 gender:
+     *                   type: string
+     *                 nickname:
+     *                   type: string
      *       responses:
      *         "200":
      *           description: "유저 정보 수정 성공"
+     *           content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                  updatedRow:
+     *                    type: number
      *
+     *   /user/userdelete:
+     *     delete:
+     *       tags:
+     *       - "user"
+     *       description: "유저 삭제"
+     *       security:
+     *         - jwt: []
+     *       responses:
+     *         "200":
+     *           description: "유저 정보 삭제 성공"
+     *           content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 deletedRow:
+     *                   type: number
      *
      * components:
      *  securitySchemes:
@@ -87,10 +110,18 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
     const userInfo = userService.getUserInfo(userId.userPk);
     res.json(userInfo);
   });
-  router.post("/userUpdate", loginRequired(), (req, _res) => {
+  router.post("/userUpdate", loginRequired(), (req, res) => {
     const userpk = getUserId(req).userPk;
     const info = req.body.userInfo;
-    userService.setUserInfo(userpk, info);
+    const Row = userService.setUserInfo(userpk, info);
+    res.json({ updatedRow: Row });
+    return;
+  });
+  router.delete("/userdelete", loginRequired(), (req, res) => {
+    const userPk = getUserId(req).userPk;
+    const row = userService.deleteUser(userPk);
+    res.json({ deletedRow: row });
+    return;
   });
   return router;
 }

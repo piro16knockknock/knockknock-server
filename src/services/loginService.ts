@@ -44,6 +44,7 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
       return null;
     },
     async isJoin(joinPayload) {
+      console.log(joinPayload);
       const checkDuplicate = await db
         .selectFrom("user")
         .select("user_id")
@@ -67,9 +68,9 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
           gender: joinPayload.gender,
           nickname: joinPayload.nickname,
         })
-        .execute();
+        .executeTakeFirst();
 
-      return Number(ret[0].insertId);
+      return Number(ret.insertId);
     },
   };
 }

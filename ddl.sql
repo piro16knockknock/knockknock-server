@@ -7,6 +7,15 @@ CREATE TABLE test
     PRIMARY KEY (`id`)
 );
 
+CREATE TABLE Home
+(
+    `home_id`   INT NOT NULL AUTO_INCREMENT,
+    `name`      VARCHAR(50) UNIQUE,
+    `rent_date` INT,
+    `rent_month` INT,
+    PRIMARY key (`home_id`)
+);
+
 CREATE TABLE User 
 (
     `user_pk`   INT NOT NULL AUTO_INCREMENT,
@@ -37,14 +46,7 @@ CREATE TABLE Alert
     FOREIGN KEY (`user_pk`) REFERENCES `User` (`user_pk`)
 );
 
-CREATE TABLE Home
-(
-    `home_id`   INT NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(50) UNIQUE,
-    `rent_date` INT,
-    `rent_month` INT,
-    PRIMARY key (`home_id`)
-);
+
 
 CREATE TABLE Past_Home
 (

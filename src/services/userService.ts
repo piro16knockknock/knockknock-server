@@ -1,8 +1,11 @@
+import { number } from "zod";
+
 import type { Database } from "../db";
 
 export interface UserService {
   getUserInfo(userPk: number): Promise<UserInfo | null>;
-  setUserInfo(userPk: number, value: UserInfo): Promise<void>;
+  setUserInfo(userPk: number, value: UserInfo): Promise<number>;
+  deleteUser(userPk: number): Promise<number>;
 }
 
 interface UserServiceDeps {
@@ -34,7 +37,7 @@ export function createUserService({ db }: UserServiceDeps): UserService {
       return user;
     },
     async setUserInfo(userPk, info: UserInfo) {
-      await db
+      const result = await db
         .updateTable("user")
         .set({
           HomeId: info.HomeId,
@@ -43,6 +46,13 @@ export function createUserService({ db }: UserServiceDeps): UserService {
         })
         .where("user_pk", "=", userPk)
         .executeTakeFirst();
+
+      return Number(result.numUpdatedRows);
+    },
+    async deleteUser(userPk) {
+      const result = await db.deleteFrom("user").where("user_pk", "=", userPk).executeTakeFirst();
+
+      return Number(result.numDeletedRows);
     },
   };
 }
