@@ -6,6 +6,7 @@ export interface DatabaseSchema {
   Home: Home;
   TodoCategory: TodoCategory;
   Todo: Todo;
+  PastHome: PastHome;
 }
 
 export interface Test {
@@ -15,8 +16,8 @@ export interface Test {
 }
 
 export interface User {
-  user_pk: Generated<number>;
-  user_id: string;
+  userPk: Generated<number>;
+  userId: string;
   password: string;
   HomeId?: number;
   name: string;
@@ -25,10 +26,17 @@ export interface User {
 }
 
 export interface Home {
-  home_id: Generated<number>;
+  homeId: Generated<number>;
   name: string;
-  rent_date?: number;
-  rent_month?: number;
+  rentDate?: number;
+  rentMonth?: number;
+}
+
+export interface PastHome {
+  userPk: number;
+  homeId2: number;
+  startDate: number;
+  endDate: number;
 }
 
 export interface TodoCategory {
@@ -42,5 +50,5 @@ export interface Todo {
   date: number;
   cateId: number;
   userPk: number;
-  isComplete: boolean;
+  isCompleted: boolean;
 }

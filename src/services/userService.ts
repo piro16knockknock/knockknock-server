@@ -22,10 +22,11 @@ export function createUserService({ db }: UserServiceDeps): UserService {
     async getUserInfo(userPk) {
       const ret = await db
         .selectFrom("user")
-        .select(["name", "HomeId", "gender", "nickname"])
-        .where("user_pk", "=", userPk)
+        .select(["name", "gender", "nickname", "HomeId"])
+        .where("userPk", "=", userPk)
         .execute();
 
+      console.log(ret);
       if (ret.length === 0) {
         return null;
       }
@@ -44,14 +45,13 @@ export function createUserService({ db }: UserServiceDeps): UserService {
           gender: info.gender,
           nickname: info.nickname,
         })
-        .where("user_pk", "=", userPk)
+        .where("userPk", "=", userPk)
         .executeTakeFirst();
 
       return Number(result.numUpdatedRows);
     },
     async deleteUser(userPk) {
-      const result = await db.deleteFrom("user").where("user_pk", "=", userPk).executeTakeFirst();
-
+      const result = await db.deleteFrom("user").where("userPk", "=", userPk).executeTakeFirst();
       return Number(result.numDeletedRows);
     },
   };

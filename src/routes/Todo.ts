@@ -41,7 +41,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
         date: zod.number(),
         cateId: zod.number(),
         userPk: zod.number(),
-        isComplete: zod.boolean(),
+        isCompleted: zod.boolean(),
       });
 
       const todoInfo = validator.parse(req.body);
@@ -133,7 +133,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#definitions/todoInfo"
+ *               $ref: "#definitions/posttodoInfo"
  *       responses:
  *         "200":
  *           description: 집 등록 성공
@@ -205,6 +205,20 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *     properties:
  *       todoId:
  *         type: number
+ *       todoContent:
+ *         type: string
+ *       date:
+ *         type: number
+ *         example: "20220601"
+ *       cateId:
+ *         type: number
+ *       userPk:
+ *         type: number
+ *       isComplete:
+ *         type: boolean
+ *   posttodoInfo:
+ *     type: object
+ *     properties:
  *       todoContent:
  *         type: string
  *       date:

@@ -2,6 +2,7 @@ import express from "express";
 
 import { getUserId, loginRequired } from "../services/tokenLogin";
 import { UserService } from "../services/userService";
+import { asyncRoute } from "../utils/route";
 
 export interface CreateUserRouteDeps {
   userService: UserService;
@@ -105,23 +106,35 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
       userId,
     });
   });
-  router.get("/userInfo", loginRequired(), (req, res) => {
-    const userId = getUserId(req);
-    const userInfo = userService.getUserInfo(userId.userPk);
-    res.json(userInfo);
-  });
-  router.post("/userUpdate", loginRequired(), (req, res) => {
-    const userpk = getUserId(req).userPk;
-    const info = req.body.userInfo;
-    const Row = userService.setUserInfo(userpk, info);
-    res.json({ updatedRow: Row });
-    return;
-  });
-  router.delete("/userdelete", loginRequired(), (req, res) => {
-    const userPk = getUserId(req).userPk;
-    const row = userService.deleteUser(userPk);
-    res.json({ deletedRow: row });
-    return;
-  });
+  router.get(
+    "/userInfo",
+    loginRequired(),
+    asyncRoute(async (req, res) => {
+      const userId = getUserId(req);
+      const userInfo = userService.getUserInfo(userId.userPk);
+      res.json(userInfo);
+    }),
+  );
+  router.post(
+    "/userUpdate",
+    loginRequired(),
+    asyncRoute(async (req, res) => {
+      const userpk = getUserId(req).userPk;
+      const info = req.body.userInfo;
+      const Row = userService.setUserInfo(userpk, info);
+      res.json({ updatedRow: Row });
+      return;
+    }),
+  );
+  router.delete(
+    "/userdelete",
+    loginRequired(),
+    asyncRoute(async (req, res) => {
+      const userPk = getUserId(req).userPk;
+      const row = await userService.deleteUser(userPk);
+      res.json({ deletedRow: row });
+      return;
+    }),
+  );
   return router;
 }

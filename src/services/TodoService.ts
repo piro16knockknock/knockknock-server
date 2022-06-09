@@ -17,7 +17,7 @@ interface todoList {
   date: number;
   cateId: number;
   userPk: number;
-  isComplete: boolean;
+  isCompleted: boolean;
 }
 
 interface updateTodoList {
@@ -26,7 +26,7 @@ interface updateTodoList {
   date?: number;
   cateId?: number;
   userPk?: number;
-  isComplete?: boolean;
+  isCompleted?: boolean;
 }
 
 export function createTodoService({ db }: TodoServiceDeps): TodoService {
@@ -36,7 +36,7 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
     async getTodoList(userPk) {
       const ret = await db
         .selectFrom("Todo")
-        .select(["todoId", "todoContent", "date", "cateId", "userPk", "isComplete"])
+        .select(["todoId", "todoContent", "date", "cateId", "userPk", "isCompleted"])
         .where("userPk", "=", userPk)
         .execute();
 
@@ -48,7 +48,7 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
           date: s.date,
           cateId: s.cateId,
           userPk: s.userPk,
-          isComplete: s.isComplete,
+          isCompleted: s.isCompleted,
         };
         list.push(tmp);
       }
@@ -63,11 +63,11 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
           date: todoInfo.date,
           cateId: todoInfo.cateId,
           userPk: todoInfo.userPk,
-          isComplete: todoInfo.isComplete,
+          isCompleted: todoInfo.isCompleted,
         })
-        .returning("todoId")
-        .executeTakeFirstOrThrow();
-      return postTodoId.todoId;
+        .executeTakeFirst();
+
+      return Number(postTodoId.insertId);
     },
     async updateTodo(Info) {
       const updatedeRow = await db
@@ -77,7 +77,7 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
           date: Info.date,
           cateId: Info.cateId,
           userPk: Info.userPk,
-          isComplete: Info.isComplete,
+          isCompleted: Info.isCompleted,
         })
         .where("todoId", "=", Info.todoId)
         .executeTakeFirst();
