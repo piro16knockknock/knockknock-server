@@ -26,15 +26,11 @@ interface loginServiceDeps {
 export function createLoginService({ db }: loginServiceDeps): LoginService {
   return {
     async isLogin(id, password) {
-      const ret = await db
-        .selectFrom("user")
-        .select(["user_pk", "name", "password"])
-        .where("user_id", "=", id)
-        .execute();
+      const ret = await db.selectFrom("user").select(["userPk", "name", "password"]).where("userId", "=", id).execute();
 
       if (bcrypt.compareSync(password, ret[0].password)) {
         const payload = {
-          userPk: ret[0].user_pk,
+          userPk: ret[0].userPk,
           id: id,
           name: ret[0].name,
         };
@@ -44,10 +40,11 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
       return null;
     },
     async isJoin(joinPayload) {
+      console.log(joinPayload);
       const checkDuplicate = await db
         .selectFrom("user")
-        .select("user_id")
-        .where("user_id", "=", joinPayload.id)
+        .select("userId")
+        .where("userId", "=", joinPayload.id)
         .execute();
 
       if (checkDuplicate.length !== 0) {
@@ -61,15 +58,15 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
       const ret = await db
         .insertInto("user")
         .values({
-          user_id: joinPayload.id,
+          userId: joinPayload.id,
           password: hash,
           name: joinPayload.name,
           gender: joinPayload.gender,
           nickname: joinPayload.nickname,
         })
-        .execute();
+        .executeTakeFirst();
 
-      return Number(ret[0].insertId);
+      return Number(ret.insertId);
     },
   };
 }

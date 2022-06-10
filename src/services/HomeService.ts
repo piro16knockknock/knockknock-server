@@ -5,6 +5,7 @@ export interface HomeService {
   postHomeInfo(Info: HomeInfo): Promise<number>;
   updateHomeInfo(homeId: number, Info: HomeInfo): Promise<number>;
   deleteHome(id: number): Promise<number>;
+  // deleteHome(userPk: number): Promise<void>;
 }
 
 interface HomeServiceDeps {
@@ -27,26 +28,25 @@ export function createHomeService({ db }: HomeServiceDeps): HomeService {
     async getHomeInfo(homeId) {
       const ret = await db
         .selectFrom("Home")
-        .select(["home_id", "name", "rent_date", "rent_month"])
-        .where("home_id", "=", homeId)
+        .select(["homeId", "name", "rentDate", "rentMonth"])
+        .where("homeId", "=", homeId)
         .execute();
 
       const curHomeInfo = {
-        Homeid: ret[0].home_id,
+        HomeId: ret[0].homeId,
         name: ret[0].name,
-        rentDate: ret[0].rent_date,
-        rentMonth: ret[0].rent_month,
+        rentDate: ret[0].rentDate,
+        rentMonth: ret[0].rentMonth,
       };
       return curHomeInfo;
     },
     async postHomeInfo(info: HomeInfo) {
       const postedHome = await db
         .insertInto("Home")
-
         .values({
           name: info.name,
-          rent_date: info.rentDate,
-          rent_month: info.rentMonth,
+          rentDate: info.rentDate,
+          rentMonth: info.rentMonth,
         })
         .executeTakeFirst();
       return Number(postedHome.insertId);
@@ -54,15 +54,20 @@ export function createHomeService({ db }: HomeServiceDeps): HomeService {
     async updateHomeInfo(homeId: number, Info: updateHomeInfo) {
       const updatedeRow = await db
         .updateTable("Home")
-        .set({ name: Info.name, rent_date: Info.rentDate, rent_month: Info.rentMonth })
-        .where("home_id", "=", homeId)
+        .set({ name: Info.name, rentDate: Info.rentDate, rentMonth: Info.rentMonth })
+        .where("homeId", "=", homeId)
         .executeTakeFirst();
 
       return Number(updatedeRow.numUpdatedRows);
     },
     async deleteHome(id) {
-      const deletedHome = await db.deleteFrom("Home").where("home_id", "=", id).executeTakeFirst();
+      const deletedHome = await db.deleteFrom("Home").where("homeId", "=", id).executeTakeFirst();
       return Number(deletedHome.numDeletedRows);
     },
+    /*
+    async deleteHome (userPk) {
+      await db.updateTable("user").where("userPk","=",userPk).set({HomeId: null})
+    }
+    */
   };
 }

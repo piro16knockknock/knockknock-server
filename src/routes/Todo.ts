@@ -28,7 +28,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
         return;
       }
 
-      res.json({ TodoList: List });
+      res.json({ todoList: List });
       return;
     }),
   );
@@ -36,16 +36,19 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     "/posttodo",
     loginRequired(),
     asyncRoute(async (req, res) => {
+      console.log(req.body);
       const validator = zod.object({
         todoContent: zod.string(),
         date: zod.number(),
-        cateId: zod.number(),
+        cateId: zod.number().optional(),
         userPk: zod.number(),
-        isComplete: zod.boolean(),
+        isCompleted: zod.boolean(),
       });
-
+      //카테고리 아이디가 없어서 추가를 못하는중
       const todoInfo = validator.parse(req.body);
+
       const todoId = await TodoService.postTodo(todoInfo);
+
       if (todoId == undefined) {
         res.json({ message: "할일 추가를 실패했어요" });
         return;
@@ -65,7 +68,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
         date: zod.number().optional(),
         cateId: zod.number().optional(),
         userPk: zod.number().optional(),
-        isComplete: zod.boolean().optional(),
+        isCompleted: zod.boolean().optional(),
       });
 
       const updateInfo = validator.parse(req.body);
@@ -85,7 +88,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     loginRequired(),
     asyncRoute(async (req, res) => {
       const validator = zod.number();
-      const todoId = validator.parse(req.body);
+      const todoId = validator.parse(req.body.todoId);
       const rownum = await TodoService.deleteTodo(todoId);
 
       if (rownum == undefined) {
@@ -99,3 +102,135 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
 
   return router;
 }
+
+/**
+ * @swagger
+ * paths:
+ *   /todo/gettodolist:
+ *     get:
+ *       tags:
+ *       - "todo"
+ *       description: "할일 조회"
+ *       security:
+ *         - jwt: []
+ *       responses:
+ *         "200":
+ *           description: "할일 조회 성공"
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   todoList:
+ *                     type: array
+ *                     items:
+ *                       $ref: "#definitions/todoInfo"
+ *   /todo/posttodo:
+ *     post:
+ *       tags:
+ *       - "todo"
+ *       description: "추가할 할일 정보 입력 / 카테고리 설정하고싶지 않으면 0으로 넣어주세요"
+ *       security:
+ *         - jwt: []
+ *       requestBody:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#definitions/posttodoInfo"
+ *       responses:
+ *         "200":
+ *           description: 집 등록 성공
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                     example: "집이 등록되었습니다."
+ *
+ *   /todo/updatetodo:
+ *     post:
+ *       tags:
+ *       - "todo"
+ *       description: "할일 수정"
+ *       security:
+ *         - jwt: []
+ *       requestBody:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#definitions/todoInfo"
+ *       responses:
+ *         "200":
+ *           description: 할일 수정 성공
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                     example: "?번째 row가 변경 되었습니다."
+ *   /todo/deltetodo:
+ *     delete:
+ *       tags:
+ *       - "todo"
+ *       description: "할일 삭제"
+ *       security:
+ *         - jwt: []
+ *       requestBody:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 todoId:
+ *                   type: number
+ *
+ *       responses:
+ *         "200":
+ *           description: 할일 삭제 성공
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                     example: "?번째 줄 집이 삭제 되었습니다."
+ *
+ *
+ *
+ * definitions:
+ *   todoInfo:
+ *     type: object
+ *     properties:
+ *       todoId:
+ *         type: number
+ *       todoContent:
+ *         type: string
+ *       date:
+ *         type: number
+ *         example: "20220601"
+ *       cateId:
+ *         type: number
+ *       userPk:
+ *         type: number
+ *       isCompleted:
+ *         type: boolean
+ *   posttodoInfo:
+ *     type: object
+ *     properties:
+ *       todoContent:
+ *         type: string
+ *       date:
+ *         type: number
+ *         example: "20220601"
+ *       cateId:
+ *         type: number
+ *       userPk:
+ *         type: number
+ *       isCompleted:
+ *         type: boolean
+ */

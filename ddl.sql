@@ -7,20 +7,29 @@ CREATE TABLE test
     PRIMARY KEY (`id`)
 );
 
+CREATE TABLE Home
+(
+    `homeId`   INT NOT NULL AUTO_INCREMENT,
+    `name`      VARCHAR(50) UNIQUE,
+    `rentDate` INT,
+    `rentMonth` INT,
+    PRIMARY key (`homeId`)
+);
+
 CREATE TABLE User 
 (
-    `user_pk`   INT NOT NULL AUTO_INCREMENT,
-    `user_id`   VARCHAR(30) NOT NULL,
+    `userPk`   INT NOT NULL AUTO_INCREMENT,
+    `userId`   VARCHAR(30) NOT NULL,
     `password`  VARCHAR(200) NOT NULL,
     `name`      VARCHAR(20) NOT NULL,
     `gender`    VARCHAR(20),
     `nickname`  VARCHAR(20),
-    `home_id`   INT,
-    `profile_image` BLOB,
-    `title_id`  INT,
-    `test_id`   INT,
-    PRIMARY key (`user_pk`),
-    FOREIGN KEY (`home_id`) REFERENCES `Home` (`home_id`)
+    `homeId`   INT,
+    `profileImage` BLOB,
+    `titleId`  INT,
+    `testId`   INT,
+    PRIMARY key (`userPk`),
+    FOREIGN KEY (`homeId`) REFERENCES `Home` (`homeId`)
 );
 /*
     FOREIGN KEY (`title_id`) REFERENCES `title` (`title_id`),
@@ -29,59 +38,52 @@ CREATE TABLE User
 
 CREATE TABLE Alert
 (
-    `alert_id`  INT NOT NULL AUTO_INCREMENT,
+    `alertId`  INT NOT NULL AUTO_INCREMENT,
     `content`   VARCHAR(50) NOT NULL,
-    `alert_at`  TIMESTAMP   NOT NULL,
-    `user_pk`   INT NOT NULL,
-    PRIMARY KEY (`alert_id`),
-    FOREIGN KEY (`user_pk`) REFERENCES `User` (`user_pk`)
+    `alertAt`  TIMESTAMP   NOT NULL,
+    `userPk`   INT NOT NULL,
+    PRIMARY KEY (`alertId`),
+    FOREIGN KEY (`userPk`) REFERENCES `User` (`userPk`)
 );
 
-CREATE TABLE Home
-(
-    `home_id`   INT NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(50) UNIQUE,
-    `rent_date` INT,
-    `rent_month` INT,
-    PRIMARY key (`home_id`)
-);
 
-CREATE TABLE Past_Home
+
+CREATE TABLE PastHome
 (
-    `user_pk` INT NOT NULL AUTO_INCREMENT,
-    `home_id2` INT NOT NULL,
-    `start_date` TIMESTAMP,
-    `end_date`  TIMESTAMP,
-    FOREIGN KEY (`user_pk`) REFERENCES `User` (`user_pk`),
-    FOREIGN KEY (`home_id2`) REFERENCES `Home` (`home_id`)
+    `userPk` INT NOT NULL,
+    `homeId2` INT NOT NULL,
+    `startDate` INT,
+    `endDate`  INT,
+    FOREIGN KEY (`userPk`) REFERENCES `User` (`userPk`),
+    FOREIGN KEY (`homeId2`) REFERENCES `Home` (`homeId`)
 );
 
 CREATE TABLE Residence
 (
-    `residence_id`  INT NOT NULL AUTO_INCREMENT,
-    `home_id`   INT NOT NULL,
+    `residenceId`  INT NOT NULL AUTO_INCREMENT,
+    `homeId`   INT NOT NULL,
     `nation`    VARCHAR(50),
     `city`      VARCHAR(50),
     `adress`    VARCHAR(100),
-    PRIMARY KEY (`residence_id`),
-    FOREIGN KEY (`home_id`) REFERENCES `Home` (`home_id`)
+    PRIMARY KEY (`residenceId`),
+    FOREIGN KEY (`homeId`) REFERENCES `Home` (`homeId`)
 );
 
-CREATE TABLE Rule_category 
+CREATE TABLE Rulecategory 
 (
-    `rulecate_id`   INT NOT NULL AUTO_INCREMENT,
+    `rulecateId`   INT NOT NULL AUTO_INCREMENT,
     `name`  VARCHAR(30) NOT NULL,
-    PRIMARY KEY (`rulecate_id`)
+    PRIMARY KEY (`rulecateId`)
 );
 
 CREATE TABLE Rule
 (
-    `rule_id`   INT NOT NULL AUTO_INCREMENT,
-    `home_id`   INT NOT NULL,
+    `ruleId`   INT NOT NULL AUTO_INCREMENT,
+    `homeId`   INT NOT NULL,
     `content`   VARCHAR(50) NOT NULL,
-    `rulecate_id`   INT NOT NULL,
-    PRIMARY KEY (`rule_id`),
-    FOREIGN KEY (`rulecate_id`) REFERENCES `Rule_category` (`rulecate_id`)
+    `rulecateId`   INT NOT NULL,
+    PRIMARY KEY (`ruleId`),
+    FOREIGN KEY (`rulecateId`) REFERENCES `Rulecategory` (`rulecateId`)
 );
 /*
 CREATE TABLE Guideline 
@@ -99,13 +101,13 @@ CREATE TABLE Guideline
 
 CREATE TABLE Utility 
 (
-    `utility_id`    INT NOT NULL AUTO_INCREMENT,
-    `home_id`   INT NOT NULL,
+    `utilityId`    INT NOT NULL AUTO_INCREMENT,
+    `homeId`   INT NOT NULL,
     `name`  VARCHAR(30),
-    `utility_date`  INT,
-    `utility_month` INT,
-    PRIMARY KEY (`utility_id`),
-    FOREIGN KEY (`home_id`) REFERENCES `Home` (`home_id`)
+    `utilityDate`  INT,
+    `utilityMonth` INT,
+    PRIMARY KEY (`utilityId`),
+    FOREIGN KEY (`homeId`) REFERENCES `Home` (`homeId`)
 );
 
 /*
@@ -128,26 +130,26 @@ CREATE TABLE title
 );
 */
 
-CREATE TABLE Roommate_invite
+CREATE TABLE Roommateinvite
 (
-    `invite_id` INT NOT NULL AUTO_INCREMENT,
-    `home_id`   INT NOT NULL,
-    `user_pk`   INT NOT NULL,
-    `invited_time`    TIMESTAMP,
-    `invite_link`   VARCHAR(100),
-    `is_acceptd`    boolean DEFAULT NULL,
-    PRIMARY KEY(`invite_id`),
-    FOREIGN KEY(`home_id`) REFERENCES `Home` (`home_id`),
-    FOREIGN KEY(`user_pk`)  REFERENCES `User` (`user_pk`)
+    `inviteId` INT NOT NULL AUTO_INCREMENT,
+    `homeId`   INT NOT NULL,
+    `userPk`   INT NOT NULL,
+    `invitedTime`    TIMESTAMP,
+    `inviteLink`   VARCHAR(100),
+    `isAcceptd`    boolean DEFAULT NULL,
+    PRIMARY KEY(`inviteId`),
+    FOREIGN KEY(`homeId`) REFERENCES `Home` (`homeId`),
+    FOREIGN KEY(`userPk`)  REFERENCES `User` (`userPk`)
 );
 
-CREATE TABLE TODO_Category
+CREATE TABLE TODOCategory
 (
-    `cate_id` INT NOT NULL AUTO_INCREMENT,
+    `cateId` INT NOT NULL AUTO_INCREMENT,
     `name`  VARCHAR(20) NOT NULL,
-    `home_id`   INT NOT NULL,
-    PRIMARY KEY (`cate_id`),
-    FOREIGN KEY (`home_id`) REFERENCES `Home` (`home_id`)
+    `homeId`   INT NOT NULL,
+    PRIMARY KEY (`cateId`),
+    FOREIGN KEY (`homeId`) REFERENCES `Home` (`homeId`)
 );
 /*
     `user_pk`   INT NOT NULL,
@@ -155,15 +157,15 @@ CREATE TABLE TODO_Category
 */
 CREATE TABLE TODO
 (
-    `todo_id` INT NOT NULL AUTO_INCREMENT,
-    `todo_content` VARCHAR(100) NOT NULL,
+    `todoId` INT NOT NULL AUTO_INCREMENT,
+    `todoContent` VARCHAR(100) NOT NULL,
     `date` TIMESTAMP,
-    `cate_id` INT NOT NULL,
-    `user_pk` INT NOT NULL,
-    `is_completed` boolean DEFAULT NULL,
-    PRIMARY KEY(`todo_id`),
-    FOREIGN KEY(`cate_id`) REFERENCES `TODO_Category` (`cate_id`),
-    FOREIGN KEY(`user_pk`) REFERENCES `User` (`user_pk`)
+    `cateId` INT,
+    `userPk` INT NOT NULL,
+    `isCompleted` boolean DEFAULT NULL,
+    PRIMARY KEY(`todoId`),
+    FOREIGN KEY(`cateId`) REFERENCES `TODOCategory` (`cateId`),
+    FOREIGN KEY(`userPk`) REFERENCES `User` (`userPk`)
 );
 /* 
     `home_id` INT NOT NULL,

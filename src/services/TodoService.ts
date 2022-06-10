@@ -15,18 +15,18 @@ interface todoList {
   todoId?: number;
   todoContent: string;
   date: number;
-  cateId: number;
+  cateId?: number | null;
   userPk: number;
-  isComplete: boolean;
+  isCompleted: boolean;
 }
 
 interface updateTodoList {
   todoId: number;
   todoContent?: string;
   date?: number;
-  cateId?: number;
+  cateId?: number | null;
   userPk?: number;
-  isComplete?: boolean;
+  isCompleted?: boolean;
 }
 
 export function createTodoService({ db }: TodoServiceDeps): TodoService {
@@ -36,19 +36,19 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
     async getTodoList(userPk) {
       const ret = await db
         .selectFrom("Todo")
-        .select(["todoId", "todoContent", "date", "cateId", "userPk", "isComplete"])
+        .select(["todoId", "todoContent", "date", "cateId", "userPk", "isCompleted"])
         .where("userPk", "=", userPk)
         .execute();
 
       const list: todoList[] = [];
       for (const s of ret) {
-        const tmp = {
+        const tmp: todoList = {
           todoId: s.todoId,
           todoContent: s.todoContent,
           date: s.date,
           cateId: s.cateId,
           userPk: s.userPk,
-          isComplete: s.isComplete,
+          isCompleted: s.isCompleted,
         };
         list.push(tmp);
       }
@@ -56,6 +56,11 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
       return list;
     },
     async postTodo(todoInfo) {
+      console.dir(todoInfo.cateId, typeof todoInfo.cateId);
+
+      if (todoInfo.cateId === 0 || todoInfo.cateId === undefined) {
+        todoInfo.cateId = null;
+      }
       const postTodoId = await db
         .insertInto("Todo")
         .values({
@@ -63,13 +68,16 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
           date: todoInfo.date,
           cateId: todoInfo.cateId,
           userPk: todoInfo.userPk,
-          isComplete: todoInfo.isComplete,
+          isCompleted: todoInfo.isCompleted,
         })
-        .returning("todoId")
-        .executeTakeFirstOrThrow();
-      return postTodoId.todoId;
+        .executeTakeFirst();
+
+      return Number(postTodoId.insertId);
     },
     async updateTodo(Info) {
+      if (Info.cateId === 0 || Info.cateId === undefined) {
+        Info.cateId = null;
+      }
       const updatedeRow = await db
         .updateTable("Todo")
         .set({
@@ -77,7 +85,7 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
           date: Info.date,
           cateId: Info.cateId,
           userPk: Info.userPk,
-          isComplete: Info.isComplete,
+          isCompleted: Info.isCompleted,
         })
         .where("todoId", "=", Info.todoId)
         .executeTakeFirst();

@@ -30,14 +30,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *           content:
    *             application/json:
    *               schema:
-   *                 type: object
-   *                 properties:
-   *                   name:
-   *                     type: string
-   *                   rentDate:
-   *                     type: number
-   *                   rentMonth:
-   *                     type: number
+   *                 $ref: "#definitions/homeInfo"
    *   /home/posthome:
    *     post:
    *       tags:
@@ -45,20 +38,11 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *       description: "집 정보 입력"
    *       security:
    *         - jwt: []
-   *       parameters:
-   *       - name: "homeInfo"
-   *         in: "body"
-   *         description: "집정보"
-   *         required: true
-   *         schema:
-   *           type: "object"
-   *           properties:
-   *             name:
-   *               type: string
-   *             rentDate:
-   *               type: number
-   *             rentMonth:
-   *               type: number
+   *       requestBody:
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#definitions/homeInfo"
    *       responses:
    *         "200":
    *           description: 집 등록 성공
@@ -69,8 +53,59 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *                 properties:
    *                   message:
    *                     type: string
-   *                     description: "집 등록 성공 메세지"
+   *                     example: "집이 등록되었습니다."
    *
+   *   /home/updateHome:
+   *     post:
+   *       tags:
+   *       - "Home"
+   *       description: "집 정보 수정"
+   *       security:
+   *         - jwt: []
+   *       requestBody:
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#definitions/homeInfo"
+   *       responses:
+   *         "200":
+   *           description: 집 정보 수정 성공
+   *           content:
+   *             application/json:
+   *               schema:
+   *                 type: object
+   *                 properties:
+   *                   message:
+   *                     type: string
+   *                     example: "?번째 row가 변경 되었습니다."
+   *   /home/deleteHome:
+   *     delete:
+   *       tags:
+   *       - "Home"
+   *       description: "집 정보 삭제"
+   *       security:
+   *         - jwt: []
+   *       responses:
+   *         "200":
+   *           description: 집 정보 삭제 성공
+   *           content:
+   *             application/json:
+   *               schema:
+   *                 type: object
+   *                 properties:
+   *                   message:
+   *                     type: string
+   *                     example: "?번째 줄 집이 삭제 되었습니다."
+   * definitions:
+   *   homeInfo:
+   *     type: object
+   *     properties:
+   *       name:
+   *         type: string
+   *       rentDate:
+   *         type: number
+   *       rentMonth:
+   *         type: number
    */
   router.get(
     "/gethome",
@@ -84,13 +119,14 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
       //유저 서비스에서는 토큰에서 받은 유저 아이디를 이용해서 유저 정보 불러올 것
 
       const userPk = getUserId(req).userPk;
-      const info = await userService.getUserInfo(userPk);
 
+      const info = await userService.getUserInfo(userPk);
       if (info?.HomeId === undefined) {
         res.json({ message: `등록된 집이 없어요` });
         return;
       }
-      const homeInfo = homeService.getHomeInfo(info.HomeId);
+      const homeInfo = await homeService.getHomeInfo(info.HomeId);
+      console.log(homeInfo);
       res.json({ HomeInfo: homeInfo });
       return;
     }),
@@ -112,7 +148,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
 
       const homeId = await homeService.postHomeInfo(homeInfo);
 
-      userService.setUserInfo(userPk, { HomeId: homeId });
+      await userService.setUserInfo(userPk, { HomeId: homeId });
 
       res.json({ message: `집이 등록되었습니다.` });
       return;
@@ -124,19 +160,20 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
     loginRequired(),
     asyncRoute(async (req, res) => {
       const userPk = getUserId(req).userPk;
-      const homeInfo = req.body.homeInfo;
+      const homeInfo = req.body;
       const userInfo = await userService.getUserInfo(userPk);
       if (userInfo?.HomeId === undefined) {
         res.json({ Message: "집 등록을 먼저 하고, 수정을 진행하세요" });
         return;
       }
-      const homeRow = homeService.updateHomeInfo(userInfo?.HomeId, homeInfo);
+      console.log(homeInfo);
+      const homeRow = await homeService.updateHomeInfo(userInfo?.HomeId, homeInfo);
       res.json({ message: `${homeRow}번째 row가 변경 되었습니다.` });
       return;
     }),
   );
 
-  //delete 살고있는 집 삭제
+  //delete 살고있는 집 삭제?
   router.delete(
     "/deleteHome",
     loginRequired(),
@@ -148,7 +185,10 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
         res.json({ message: "삭제할 집이 없어요" });
         return;
       }
-      const deletedHomeId = homeService.deleteHome(homeId);
+      //pastHome으로 보내고 삭제해야함
+
+      //지금 포레인키 걸려있어서 삭제가 안되고 있음 -> 자식객체 먼저 삭제해야함?
+      const deletedHomeId = await homeService.deleteHome(homeId);
       res.json({ message: `${deletedHomeId}번째 집이 삭제 되었습니다.` });
       return;
     }),

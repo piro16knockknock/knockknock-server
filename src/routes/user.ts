@@ -2,6 +2,7 @@ import express from "express";
 
 import { getUserId, loginRequired } from "../services/tokenLogin";
 import { UserService } from "../services/userService";
+import { asyncRoute } from "../utils/route";
 
 export interface CreateUserRouteDeps {
   userService: UserService;
@@ -53,23 +54,46 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
      *       description: "유저 정보 수정"
      *       security:
      *         - jwt: []
-     *       parameters:
-     *       - name: "userInfo"
-     *         in: body
-     *         description: 수정할 유저 정보
-     *         schema:
-     *           type: object
-     *           properties:
-     *             HomeId:
-     *               type: number
-     *             gender:
-     *               type: string
-     *             nickname:
-     *               type: string
+     *       requestBody:
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 HomeId:
+     *                   type: number
+     *                 gender:
+     *                   type: string
+     *                 nickname:
+     *                   type: string
      *       responses:
      *         "200":
      *           description: "유저 정보 수정 성공"
+     *           content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                  updatedRow:
+     *                    type: number
      *
+     *   /user/userdelete:
+     *     delete:
+     *       tags:
+     *       - "user"
+     *       description: "유저 삭제"
+     *       security:
+     *         - jwt: []
+     *       responses:
+     *         "200":
+     *           description: "유저 정보 삭제 성공"
+     *           content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 deletedRow:
+     *                   type: number
      *
      * components:
      *  securitySchemes:
@@ -82,15 +106,35 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
       userId,
     });
   });
-  router.get("/userInfo", loginRequired(), (req, res) => {
-    const userId = getUserId(req);
-    const userInfo = userService.getUserInfo(userId.userPk);
-    res.json(userInfo);
-  });
-  router.post("/userUpdate", loginRequired(), (req, _res) => {
-    const userpk = getUserId(req).userPk;
-    const info = req.body.userInfo;
-    userService.setUserInfo(userpk, info);
-  });
+  router.get(
+    "/userInfo",
+    loginRequired(),
+    asyncRoute(async (req, res) => {
+      const userId = getUserId(req);
+      const userInfo = userService.getUserInfo(userId.userPk);
+      res.json(userInfo);
+    }),
+  );
+  router.post(
+    "/userUpdate",
+    loginRequired(),
+    asyncRoute(async (req, res) => {
+      const userpk = getUserId(req).userPk;
+      const info = req.body.userInfo;
+      const Row = userService.setUserInfo(userpk, info);
+      res.json({ updatedRow: Row });
+      return;
+    }),
+  );
+  router.delete(
+    "/userdelete",
+    loginRequired(),
+    asyncRoute(async (req, res) => {
+      const userPk = getUserId(req).userPk;
+      const row = await userService.deleteUser(userPk);
+      res.json({ deletedRow: row });
+      return;
+    }),
+  );
   return router;
 }
