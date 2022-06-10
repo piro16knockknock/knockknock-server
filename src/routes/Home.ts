@@ -173,7 +173,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
     }),
   );
 
-  //delete 살고있는 집 삭제
+  //delete 살고있는 집 삭제?
   router.delete(
     "/deleteHome",
     loginRequired(),
@@ -187,7 +187,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
       }
       //pastHome으로 보내고 삭제해야함
 
-      //지금 포레인키 걸려있어서 삭제가 안되고 있음
+      //지금 포레인키 걸려있어서 삭제가 안되고 있음 -> 자식객체 먼저 삭제해야함?
       const deletedHomeId = await homeService.deleteHome(homeId);
       res.json({ message: `${deletedHomeId}번째 집이 삭제 되었습니다.` });
       return;

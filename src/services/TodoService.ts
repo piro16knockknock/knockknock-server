@@ -15,7 +15,7 @@ interface todoList {
   todoId?: number;
   todoContent: string;
   date: number;
-  cateId: number;
+  cateId?: number | null;
   userPk: number;
   isCompleted: boolean;
 }
@@ -24,7 +24,7 @@ interface updateTodoList {
   todoId: number;
   todoContent?: string;
   date?: number;
-  cateId?: number;
+  cateId?: number | null;
   userPk?: number;
   isCompleted?: boolean;
 }
@@ -42,7 +42,7 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
 
       const list: todoList[] = [];
       for (const s of ret) {
-        const tmp = {
+        const tmp: todoList = {
           todoId: s.todoId,
           todoContent: s.todoContent,
           date: s.date,
@@ -56,6 +56,11 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
       return list;
     },
     async postTodo(todoInfo) {
+      console.dir(todoInfo.cateId, typeof todoInfo.cateId);
+
+      if (todoInfo.cateId === 0 || todoInfo.cateId === undefined) {
+        todoInfo.cateId = null;
+      }
       const postTodoId = await db
         .insertInto("Todo")
         .values({
@@ -70,6 +75,9 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
       return Number(postTodoId.insertId);
     },
     async updateTodo(Info) {
+      if (Info.cateId === 0 || Info.cateId === undefined) {
+        Info.cateId = null;
+      }
       const updatedeRow = await db
         .updateTable("Todo")
         .set({

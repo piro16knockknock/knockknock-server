@@ -160,7 +160,7 @@ CREATE TABLE TODO
     `todoId` INT NOT NULL AUTO_INCREMENT,
     `todoContent` VARCHAR(100) NOT NULL,
     `date` TIMESTAMP,
-    `cateId` INT NOT NULL,
+    `cateId` INT,
     `userPk` INT NOT NULL,
     `isCompleted` boolean DEFAULT NULL,
     PRIMARY KEY(`todoId`),

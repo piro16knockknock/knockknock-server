@@ -48,7 +48,7 @@ export interface Todo {
   todoId: Generated<number>;
   todoContent: string;
   date: number;
-  cateId: number;
+  cateId: number | null;
   userPk: number;
   isCompleted: boolean;
 }

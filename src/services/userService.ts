@@ -1,5 +1,3 @@
-import { number } from "zod";
-
 import type { Database } from "../db";
 
 export interface UserService {

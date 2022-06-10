@@ -36,16 +36,19 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     "/posttodo",
     loginRequired(),
     asyncRoute(async (req, res) => {
+      console.log(req.body);
       const validator = zod.object({
         todoContent: zod.string(),
         date: zod.number(),
-        cateId: zod.number(),
+        cateId: zod.number().optional(),
         userPk: zod.number(),
         isCompleted: zod.boolean(),
       });
-
+      //카테고리 아이디가 없어서 추가를 못하는중
       const todoInfo = validator.parse(req.body);
+
       const todoId = await TodoService.postTodo(todoInfo);
+
       if (todoId == undefined) {
         res.json({ message: "할일 추가를 실패했어요" });
         return;
@@ -65,7 +68,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
         date: zod.number().optional(),
         cateId: zod.number().optional(),
         userPk: zod.number().optional(),
-        isComplete: zod.boolean().optional(),
+        isCompleted: zod.boolean().optional(),
       });
 
       const updateInfo = validator.parse(req.body);
@@ -126,7 +129,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *     post:
  *       tags:
  *       - "todo"
- *       description: "추가할 할일 정보 입력"
+ *       description: "추가할 할일 정보 입력 / 카테고리 설정하고싶지 않으면 0으로 넣어주세요"
  *       security:
  *         - jwt: []
  *       requestBody:
@@ -169,7 +172,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *                   message:
  *                     type: string
  *                     example: "?번째 row가 변경 되었습니다."
- *   /todo/deletetodo:
+ *   /todo/deltetodo:
  *     delete:
  *       tags:
  *       - "todo"
@@ -214,7 +217,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *         type: number
  *       userPk:
  *         type: number
- *       isComplete:
+ *       isCompleted:
  *         type: boolean
  *   posttodoInfo:
  *     type: object
@@ -228,6 +231,6 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *         type: number
  *       userPk:
  *         type: number
- *       isComplete:
+ *       isCompleted:
  *         type: boolean
  */
