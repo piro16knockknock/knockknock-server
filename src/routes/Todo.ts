@@ -139,7 +139,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *               $ref: "#definitions/posttodoInfo"
  *       responses:
  *         "200":
- *           description: 집 등록 성공
+ *           description: 할일 등록 성공
  *           content:
  *             application/json:
  *               schema:
@@ -147,7 +147,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *                 properties:
  *                   message:
  *                     type: string
- *                     example: "집이 등록되었습니다."
+ *                     example: "할일이 등록되었습니다."
  *
  *   /todo/updatetodo:
  *     post:
@@ -198,7 +198,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *                 properties:
  *                   message:
  *                     type: string
- *                     example: "?번째 줄 집이 삭제 되었습니다."
+ *                     example: "?번째 줄 할일이 삭제 되었습니다."
  *
  *
  *
