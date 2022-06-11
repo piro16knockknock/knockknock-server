@@ -65,6 +65,7 @@ export function createRuleService({ db }: ruleServiceDeps): ruleService {
       if (info.rulecateId === 0 || info.rulecateId === undefined) {
         info.rulecateId = null;
       }
+
       const updatedRow = await db
         .updateTable("Rule")
         .set({

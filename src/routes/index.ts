@@ -21,7 +21,7 @@ export function createRoutes({ services }: CreateRouteDeps) {
   router.use("/home", createHomeRoute({ homeService: services.homeService, userService: services.UserService }));
 
   router.use("/todo", createTodoRoute({ TodoService: services.TodoService }));
-  router.use("/rule", createRuleRoute({ ruleService: services.ruleService, homeService: services.homeService }));
+  router.use("/rule", createRuleRoute({ ruleService: services.ruleService, UserService: services.UserService }));
 
   return router;
 }

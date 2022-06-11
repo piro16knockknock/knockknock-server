@@ -90,7 +90,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
       const validator = zod.number();
       const todoId = validator.parse(req.body.todoId);
       const rownum = await TodoService.deleteTodo(todoId);
-
+      // TODO : todo의 주인이 지금 로그인된 유저가 아니라면 컷
       if (rownum == undefined) {
         res.json({ message: "할일 삭제에 실패했어요" });
         return;

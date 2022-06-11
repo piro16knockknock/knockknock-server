@@ -188,6 +188,9 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
       //pastHome으로 보내고 삭제해야함
 
       //지금 포레인키 걸려있어서 삭제가 안되고 있음 -> 자식객체 먼저 삭제해야함?
+
+      // TODO: 집 삭제가 아니라 이사로 바꾸기
+      //       집은 유지시키되 유저정보의 집 아이디를 삭제하는 거 + pasthome으로 보내기
       const deletedHomeId = await homeService.deleteHome(homeId);
       res.json({ message: `${deletedHomeId}번째 집이 삭제 되었습니다.` });
       return;

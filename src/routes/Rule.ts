@@ -1,17 +1,17 @@
 import express from "express";
 import zod, { number } from "zod";
 
-import { HomeService } from "../services/HomeService";
 import { ruleService } from "../services/ruleService";
 import { getUserId, loginRequired } from "../services/tokenLogin";
+import { UserService } from "../services/userService";
 import { asyncRoute } from "../utils/route";
 
 export interface CreateRuleRoutesDeps {
   ruleService: ruleService;
-  homeService: HomeService;
+  UserService: UserService;
 }
 
-export function createRuleRoute({ ruleService, homeService }: CreateRuleRoutesDeps) {
+export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDeps) {
   const router = express.Router();
 
   router.get(
@@ -19,9 +19,9 @@ export function createRuleRoute({ ruleService, homeService }: CreateRuleRoutesDe
     loginRequired(),
     asyncRoute(async (req, res) => {
       const userPk = getUserId(req).userPk;
-      const homeInfo = await homeService.getHomeInfo(userPk);
-      const homeId = homeInfo.Homeid;
-      if (homeId == undefined) {
+      const userInfo = await UserService.getUserInfo(userPk);
+      const homeId = userInfo?.HomeId;
+      if (homeId == undefined || homeId == null) {
         res.json({ message: "집이 없어서 규칙을 찾을수 없어요" });
         return;
       }
@@ -55,7 +55,7 @@ export function createRuleRoute({ ruleService, homeService }: CreateRuleRoutesDe
     }),
   );
   router.post(
-    "/updateRule",
+    "/updaterule",
     loginRequired(),
     asyncRoute(async (req, res) => {
       const validator = zod.object({
@@ -70,6 +70,8 @@ export function createRuleRoute({ ruleService, homeService }: CreateRuleRoutesDe
         res.json({ message: "규칙 업데이트에 실패했어요" });
         return;
       }
+      res.json({ message: `${updateInfo.ruleId}번 규칙을 수정했습니다.` });
+      return;
     }),
   );
   router.delete(
@@ -78,6 +80,7 @@ export function createRuleRoute({ ruleService, homeService }: CreateRuleRoutesDe
     asyncRoute(async (req, res) => {
       const validator = zod.number();
       const ruleId = validator.parse(req.body);
+      console.log(ruleId);
       const rownum = await ruleService.deleteRule(ruleId);
 
       if (rownum == undefined) {
