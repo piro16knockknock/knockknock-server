@@ -3,6 +3,7 @@ import express from "express";
 import { Services } from "../services";
 import { createHomeRoute } from "./Home";
 import { createLoginRoute } from "./login";
+import { createRuleRoute } from "./Rule";
 import { createTestRoute } from "./test";
 import { createTodoRoute } from "./Todo";
 import { createUserRoute } from "./user";
@@ -20,6 +21,7 @@ export function createRoutes({ services }: CreateRouteDeps) {
   router.use("/home", createHomeRoute({ homeService: services.homeService, userService: services.UserService }));
 
   router.use("/todo", createTodoRoute({ TodoService: services.TodoService }));
+  router.use("/rule", createRuleRoute({ ruleService: services.ruleService, homeService: services.homeService }));
 
   return router;
 }

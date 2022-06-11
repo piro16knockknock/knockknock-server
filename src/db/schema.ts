@@ -7,6 +7,8 @@ export interface DatabaseSchema {
   TodoCategory: TodoCategory;
   Todo: Todo;
   PastHome: PastHome;
+  Rule: Rule;
+  Rulecate: Rulecate;
 }
 
 export interface Test {
@@ -51,4 +53,16 @@ export interface Todo {
   cateId: number | null;
   userPk: number;
   isCompleted: boolean;
+}
+
+export interface Rule {
+  ruleId: Generated<number>;
+  homeId: number;
+  content: string;
+  rulecateId: number | null;
+}
+
+export interface Rulecate {
+  rulecateId: number;
+  name: string;
 }
