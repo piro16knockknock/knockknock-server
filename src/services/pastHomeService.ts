@@ -32,7 +32,6 @@ export function createPastHomeService({ db }: pastHomeServiceDeps): pastHomeServ
         };
         list.push(tmp);
       }
-
       return list;
     },
     async postHomeInfo(userPk, info) {

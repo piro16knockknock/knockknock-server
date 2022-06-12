@@ -2,6 +2,7 @@ import express from "express";
 import zod from "zod";
 
 import { HomeService } from "../services/HomeService";
+import { pastHomeService } from "../services/pastHomeService";
 import { getUserId, loginRequired } from "../services/tokenLogin";
 import { UserService } from "../services/userService";
 import { asyncRoute } from "../utils/route";
@@ -9,9 +10,10 @@ import { asyncRoute } from "../utils/route";
 export interface CreateHomeRouteDeps {
   homeService: HomeService;
   userService: UserService;
+  pastHomeService: pastHomeService;
 }
 
-export function createHomeRoute({ homeService, userService }: CreateHomeRouteDeps) {
+export function createHomeRoute({ homeService, userService, pastHomeService }: CreateHomeRouteDeps) {
   const router = express.Router();
 
   /**
@@ -78,16 +80,21 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *                   message:
    *                     type: string
    *                     example: "?번째 row가 변경 되었습니다."
-   *   /home/deleteHome:
-   *     delete:
+   *   /home/moveHome:
+   *     post:
    *       tags:
    *       - "Home"
-   *       description: "집 정보 삭제"
+   *       description: "이사하기 (현재집 이전집목록으로 보내고, 유저정보에 집 아이디 삭제)"
    *       security:
    *         - jwt: []
+   *       requestBody:
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#definitions/pasthomeInfo"
    *       responses:
    *         "200":
-   *           description: 집 정보 삭제 성공
+   *           description: 이사 성공
    *           content:
    *             application/json:
    *               schema:
@@ -95,7 +102,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *                 properties:
    *                   message:
    *                     type: string
-   *                     example: "?번째 줄 집이 삭제 되었습니다."
+   *                     example: "이사에 성공했습니다."
    * definitions:
    *   homeInfo:
    *     type: object
@@ -105,6 +112,13 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
    *       rentDate:
    *         type: number
    *       rentMonth:
+   *         type: number
+   *   pasthomeInfo:
+   *     type: object
+   *     properties:
+   *       startDate:
+   *         type: number
+   *       endDate:
    *         type: number
    */
   router.get(
@@ -121,7 +135,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
       const userPk = getUserId(req).userPk;
 
       const info = await userService.getUserInfo(userPk);
-      if (info?.HomeId === undefined) {
+      if (info?.HomeId === undefined || info.HomeId === null) {
         res.json({ message: `등록된 집이 없어요` });
         return;
       }
@@ -162,7 +176,7 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
       const userPk = getUserId(req).userPk;
       const homeInfo = req.body;
       const userInfo = await userService.getUserInfo(userPk);
-      if (userInfo?.HomeId === undefined) {
+      if (userInfo?.HomeId === undefined || userInfo.HomeId === null) {
         res.json({ Message: "집 등록을 먼저 하고, 수정을 진행하세요" });
         return;
       }
@@ -173,26 +187,46 @@ export function createHomeRoute({ homeService, userService }: CreateHomeRouteDep
     }),
   );
 
-  //delete 살고있는 집 삭제?
-  router.delete(
-    "/deleteHome",
+  //delete 살고있는 집 -> pastHome으로 보내고 그냥 Home은 유지
+  router.post(
+    "/moveHome",
     loginRequired(),
     asyncRoute(async (req, res) => {
       const userPk = getUserId(req).userPk;
       const userInfo = await userService.getUserInfo(userPk);
+      if (userInfo === null) {
+        res.json({ message: "유저 정보를 불러오지 못했어요" });
+        return;
+      }
+      console.log(req.body);
+
       const homeId = userInfo?.HomeId;
-      if (homeId === undefined) {
+      if (homeId === undefined || homeId === null) {
         res.json({ message: "삭제할 집이 없어요" });
         return;
       }
-      //pastHome으로 보내고 삭제해야함
+      //유저정보에서 집 번호 삭제
+      userInfo.HomeId = null;
+      const deleteHome = await userService.setUserInfo(userPk, userInfo);
 
-      //지금 포레인키 걸려있어서 삭제가 안되고 있음 -> 자식객체 먼저 삭제해야함?
-
+      if (deleteHome === undefined) {
+        res.json({ message: "삭제하지 못했습니다." });
+        return;
+      }
+      //이전 집 목록에 등록하기
+      const pastHomeInfo = {
+        homeId2: homeId,
+        startDate: req.body.startDate,
+        endDate: req.body.startDate,
+      };
+      const postedrow = await pastHomeService.postHomeInfo(userPk, pastHomeInfo);
+      if (postedrow === undefined) {
+        res.json({ message: "이전집등록 실패" });
+        return;
+      }
       // TODO: 집 삭제가 아니라 이사로 바꾸기
       //       집은 유지시키되 유저정보의 집 아이디를 삭제하는 거 + pasthome으로 보내기
-      const deletedHomeId = await homeService.deleteHome(homeId);
-      res.json({ message: `${deletedHomeId}번째 집이 삭제 되었습니다.` });
+      res.json({ message: `이사 성공하였습니다.` });
       return;
     }),
   );
