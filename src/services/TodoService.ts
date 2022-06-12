@@ -2,9 +2,10 @@ import { Database } from "../db";
 
 export interface TodoService {
   getTodoList(userPk: number): Promise<todoList[]>;
-  postTodo(todoInfo: todoList): Promise<number>;
+  postTodo(userPk: number, todoInfo: todoList): Promise<number>;
   deleteTodo(todoId: number): Promise<number>;
   updateTodo(todoInfo: updateTodoList): Promise<number>;
+  getTodouserPk(todoId: number): Promise<number>;
 }
 
 interface TodoServiceDeps {
@@ -16,7 +17,6 @@ interface todoList {
   todoContent: string;
   date: number;
   cateId?: number | null;
-  userPk: number;
   isCompleted: boolean;
 }
 
@@ -36,7 +36,7 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
     async getTodoList(userPk) {
       const ret = await db
         .selectFrom("Todo")
-        .select(["todoId", "todoContent", "date", "cateId", "userPk", "isCompleted"])
+        .select(["todoId", "todoContent", "date", "cateId", "isCompleted"])
         .where("userPk", "=", userPk)
         .execute();
 
@@ -47,7 +47,6 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
           todoContent: s.todoContent,
           date: s.date,
           cateId: s.cateId,
-          userPk: s.userPk,
           isCompleted: s.isCompleted,
         };
         list.push(tmp);
@@ -55,9 +54,11 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
 
       return list;
     },
-    async postTodo(todoInfo) {
-      console.dir(todoInfo.cateId, typeof todoInfo.cateId);
-
+    async getTodouserPk(todoId) {
+      const ret = await db.selectFrom("Todo").select("userPk").where("todoId", "=", todoId).execute();
+      return ret[0].userPk;
+    },
+    async postTodo(userPk, todoInfo) {
       if (todoInfo.cateId === 0 || todoInfo.cateId === undefined) {
         todoInfo.cateId = null;
       }
@@ -67,7 +68,7 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
           todoContent: todoInfo.todoContent,
           date: todoInfo.date,
           cateId: todoInfo.cateId,
-          userPk: todoInfo.userPk,
+          userPk: userPk,
           isCompleted: todoInfo.isCompleted,
         })
         .executeTakeFirst();
@@ -84,7 +85,6 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
           todoContent: Info.todoContent,
           date: Info.date,
           cateId: Info.cateId,
-          userPk: Info.userPk,
           isCompleted: Info.isCompleted,
         })
         .where("todoId", "=", Info.todoId)

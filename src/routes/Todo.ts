@@ -36,18 +36,17 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     "/posttodo",
     loginRequired(),
     asyncRoute(async (req, res) => {
-      console.log(req.body);
+      const userPk = getUserId(req).userPk;
+
       const validator = zod.object({
         todoContent: zod.string(),
         date: zod.number(),
         cateId: zod.number().optional(),
-        userPk: zod.number(),
         isCompleted: zod.boolean(),
       });
-      //카테고리 아이디가 없어서 추가를 못하는중
       const todoInfo = validator.parse(req.body);
 
-      const todoId = await TodoService.postTodo(todoInfo);
+      const todoId = await TodoService.postTodo(userPk, todoInfo);
 
       if (todoId == undefined) {
         res.json({ message: "할일 추가를 실패했어요" });
@@ -62,16 +61,22 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     "/updatetodo",
     loginRequired(),
     asyncRoute(async (req, res) => {
+      const userPk = getUserId(req).userPk;
+
       const validator = zod.object({
         todoId: zod.number(),
         todoContent: zod.string().optional(),
         date: zod.number().optional(),
         cateId: zod.number().optional(),
-        userPk: zod.number().optional(),
         isCompleted: zod.boolean().optional(),
       });
-
       const updateInfo = validator.parse(req.body);
+      const todoUserPk = await TodoService.getTodouserPk(updateInfo.todoId);
+      if (userPk != todoUserPk) {
+        res.json({ message: "내 할일이 아니라 삭제할 권한이 없어요" });
+        return;
+      }
+
       const rownum = await TodoService.updateTodo(updateInfo);
       if (rownum == undefined) {
         res.json({ message: "할일 업데이트에 실패했어요" });
@@ -87,8 +92,15 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     "/deltetodo",
     loginRequired(),
     asyncRoute(async (req, res) => {
+      const userPk = getUserId(req).userPk;
       const validator = zod.number();
       const todoId = validator.parse(req.body.todoId);
+      const todoUserPk = await TodoService.getTodouserPk(todoId);
+      if (userPk != todoUserPk) {
+        res.json({ message: "내 할일이 아니라 삭제할 권한이 없어요" });
+        return;
+      }
+
       const rownum = await TodoService.deleteTodo(todoId);
       // TODO : todo의 주인이 지금 로그인된 유저가 아니라면 컷 ** 업데이트도 체크해야함
       if (rownum == undefined) {
@@ -215,8 +227,6 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *         example: "20220601"
  *       cateId:
  *         type: number
- *       userPk:
- *         type: number
  *       isCompleted:
  *         type: boolean
  *   posttodoInfo:
@@ -228,8 +238,6 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *         type: number
  *         example: "20220601"
  *       cateId:
- *         type: number
- *       userPk:
  *         type: number
  *       isCompleted:
  *         type: boolean
