@@ -27,7 +27,7 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
       }
 
       const list = await ruleService.getRuleList(homeId);
-      if (list == undefined) {
+      if (list.length === 0) {
         res.json({ message: "조회할 규칙 리스트가 없어요" });
         return;
       }
@@ -36,16 +36,25 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
     }),
   );
   router.post(
-    "/postRule",
+    "/postrule",
     loginRequired(),
     asyncRoute(async (req, res) => {
+      console.log(req.body);
+      const userPk = getUserId(req).userPk;
+
       const validator = zod.object({
-        homeId: zod.number(),
         content: zod.string(),
         rulecateId: zod.number().optional(),
       });
       const postinfo = validator.parse(req.body);
-      const postedrow = await ruleService.postRule(postinfo);
+
+      const userInfo = await UserService.getUserInfo(userPk);
+      const homeId = userInfo?.HomeId;
+      if (homeId === undefined || homeId === null) {
+        res.json({ message: "등록된 집이 없어서 규칙을 추가할 수 없어요" });
+        return;
+      }
+      const postedrow = await ruleService.postRule(homeId, postinfo);
       if (postedrow == undefined) {
         res.json({ message: "규칙 추가에 실패했어요" });
         return;
@@ -59,12 +68,21 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
     loginRequired(),
     asyncRoute(async (req, res) => {
       const validator = zod.object({
-        ruleId: number(),
-        homeId: zod.number(),
+        ruleId: zod.number(),
         content: zod.string(),
         rulecateId: zod.number().optional(),
       });
       const updateInfo = validator.parse(req.body);
+
+      const userPk = getUserId(req).userPk;
+      const userInfo = await UserService.getUserInfo(userPk);
+      const userhomeId = userInfo?.HomeId;
+      const rulehomeId = await ruleService.getRuleInfo(updateInfo.ruleId);
+      if (userhomeId != rulehomeId) {
+        res.json({ message: "변경하려는 규칙이 지금 집에 속해있지 않아서 변경할수 없어요" });
+        return;
+      }
+
       const rownum = await ruleService.updateRule(updateInfo);
       if (rownum == undefined) {
         res.json({ message: "규칙 업데이트에 실패했어요" });
@@ -75,12 +93,24 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
     }),
   );
   router.delete(
-    "/deleteRule",
+    "/deleterule/:ruleId",
     loginRequired(),
     asyncRoute(async (req, res) => {
-      const validator = zod.number();
-      const ruleId = validator.parse(req.body);
+      const ruleId = Number(req.params.ruleId);
       console.log(ruleId);
+      if (ruleId === undefined) {
+        res.json({ message: "삭제할 규칙의 아이디를 불러오지 못했어요" });
+        return;
+      }
+      const userPk = getUserId(req).userPk;
+      const userInfo = await UserService.getUserInfo(userPk);
+      const userhomeId = userInfo?.HomeId;
+      const rulehomeId = await ruleService.getRuleInfo(ruleId);
+      if (userhomeId != rulehomeId) {
+        res.json({ message: "변경하려는 규칙이 지금 집에 속해있지 않아서 변경할수 없어요" });
+        return;
+      }
+
       const rownum = await ruleService.deleteRule(ruleId);
 
       if (rownum == undefined) {
@@ -121,7 +151,7 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
  *     post:
  *       tags:
  *       - "rule"
- *       description: "추가할 할일 정보 입력 / 카테고리 설정하고싶지 않으면 0으로 넣어주세요"
+ *       description: "추가할 규칙 정보 입력 / 카테고리 설정하고싶지 않으면 0으로 넣어주세요"
  *       security:
  *         - jwt: []
  *       requestBody:
@@ -131,7 +161,7 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
  *               $ref: "#definitions/postruleInfo"
  *       responses:
  *         "200":
- *           description: 할일 등록 성공
+ *           description: 규칙 등록 성공
  *           content:
  *             application/json:
  *               schema:
@@ -139,13 +169,13 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
  *                 properties:
  *                   message:
  *                     type: string
- *                     example: "할일이 등록되었습니다."
+ *                     example: "규칙이 등록되었습니다."
  *
  *   /rule/updaterule:
  *     post:
  *       tags:
  *       - "rule"
- *       description: "할일 수정"
+ *       description: "규칙 수정"
  *       security:
  *         - jwt: []
  *       requestBody:
@@ -155,7 +185,7 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
  *               $ref: "#definitions/ruleInfo"
  *       responses:
  *         "200":
- *           description: 할일 수정 성공
+ *           description: 규칙 수정 성공
  *           content:
  *             application/json:
  *               schema:
@@ -164,25 +194,22 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
  *                   message:
  *                     type: string
  *                     example: "?번째 row가 변경 되었습니다."
- *   /rule/delterule:
+ *   /rule/deleterule/{ruleId}:
  *     delete:
  *       tags:
  *       - "rule"
- *       description: "할일 삭제"
+ *       description: "규칙 삭제"
  *       security:
  *         - jwt: []
- *       requestBody:
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 ruleId:
- *                   type: number
+ *       parameters:
+ *       - name: "ruleId"
+ *         in: "path"
+ *         required: true
+ *         type: "number"
  *
  *       responses:
  *         "200":
- *           description: 할일 삭제 성공
+ *           description: 규칙 삭제 성공
  *           content:
  *             application/json:
  *               schema:
@@ -190,7 +217,7 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
  *                 properties:
  *                   message:
  *                     type: string
- *                     example: "?번째 줄 할일이 삭제 되었습니다."
+ *                     example: "?번째 줄 규칙이 삭제 되었습니다."
  *
  *
  *
@@ -200,8 +227,6 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
  *     properties:
  *       ruleId:
  *         type: number
- *       homeId:
- *         type: number
  *       content:
  *         type: string
  *       rulecateId:
@@ -209,8 +234,6 @@ export function createRuleRoute({ ruleService, UserService }: CreateRuleRoutesDe
  *   postruleInfo:
  *     type: object
  *     properties:
- *       homeId:
- *         type: number
  *       content:
  *         type: string
  *       rulecateId:

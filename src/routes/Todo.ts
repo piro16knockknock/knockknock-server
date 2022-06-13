@@ -23,7 +23,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
       }
 
       const List = await TodoService.getTodoList(userPk);
-      if (List == undefined) {
+      if (List.length === 0) {
         res.json({ message: "조회할 리스트가 없어요" });
         return;
       }
@@ -89,13 +89,17 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
   );
 
   router.delete(
-    "/deltetodo",
+    "/deletetodo/:todoId",
     loginRequired(),
     asyncRoute(async (req, res) => {
       const userPk = getUserId(req).userPk;
-      const validator = zod.number();
-      const todoId = validator.parse(req.body.todoId);
+      const todoId = Number(req.params.todoId);
+      if (todoId === undefined) {
+        res.json({ message: "삭제할 할일의 아이디를 불러오지 못했어요" });
+        return;
+      }
       const todoUserPk = await TodoService.getTodouserPk(todoId);
+      console.log(todoUserPk, userPk);
       if (userPk != todoUserPk) {
         res.json({ message: "내 할일이 아니라 삭제할 권한이 없어요" });
         return;
@@ -184,21 +188,18 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *                   message:
  *                     type: string
  *                     example: "?번째 row가 변경 되었습니다."
- *   /todo/deltetodo:
+ *   /todo/deletetodo/{todoId}:
  *     delete:
  *       tags:
  *       - "todo"
  *       description: "할일 삭제"
  *       security:
  *         - jwt: []
- *       requestBody:
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 todoId:
- *                   type: number
+ *       parameters:
+ *       - name: "todoId"
+ *         in: "path"
+ *         required: true
+ *         type: "number"
  *
  *       responses:
  *         "200":

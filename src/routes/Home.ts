@@ -103,6 +103,25 @@ export function createHomeRoute({ homeService, userService, pastHomeService }: C
    *                   message:
    *                     type: string
    *                     example: "이사에 성공했습니다."
+   *   /home/pastHomeList:
+   *     get:
+   *       tags:
+   *       - "Home"
+   *       description: "이전집 조회"
+   *       security:
+   *         - jwt: []
+   *       responses:
+   *         "200":
+   *           description: "이전집 조회 성공"
+   *           content:
+   *             application/json:
+   *               schema:
+   *                 type: object
+   *                 properties:
+   *                   pastHomeList:
+   *                     type: array
+   *                     items:
+   *                       $ref: "#definitions/pasthomeList"
    * definitions:
    *   homeInfo:
    *     type: object
@@ -116,6 +135,17 @@ export function createHomeRoute({ homeService, userService, pastHomeService }: C
    *   pasthomeInfo:
    *     type: object
    *     properties:
+   *       startDate:
+   *         type: number
+   *       endDate:
+   *         type: number
+   *   pasthomeList:
+   *     type: object
+   *     properties:
+   *       homeId2:
+   *         type: number
+   *       name:
+   *         type: string
    *       startDate:
    *         type: number
    *       endDate:
@@ -198,7 +228,6 @@ export function createHomeRoute({ homeService, userService, pastHomeService }: C
         res.json({ message: "유저 정보를 불러오지 못했어요" });
         return;
       }
-      console.log(req.body);
 
       const homeId = userInfo?.HomeId;
       if (homeId === undefined || homeId === null) {
@@ -227,6 +256,22 @@ export function createHomeRoute({ homeService, userService, pastHomeService }: C
       // TODO: 집 삭제가 아니라 이사로 바꾸기
       //       집은 유지시키되 유저정보의 집 아이디를 삭제하는 거 + pasthome으로 보내기
       res.json({ message: `이사 성공하였습니다.` });
+      return;
+    }),
+  );
+
+  router.get(
+    "/pastHomeList",
+    loginRequired(),
+    asyncRoute(async (req, res) => {
+      const userPk = getUserId(req).userPk;
+      const list = await pastHomeService.getPastHomeList(userPk);
+
+      if (list == undefined) {
+        res.json({ message: "조회할 이전 집이 존재하지 않아요" });
+        return;
+      }
+      res.json({ pastHomeList: list });
       return;
     }),
   );

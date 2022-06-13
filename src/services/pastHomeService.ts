@@ -1,15 +1,22 @@
 import { Database } from "../db";
 
 export interface pastHomeService {
-  getPastHomeList(userPk: number): Promise<homeInfo[]>;
+  getPastHomeList(userPk: number): Promise<listInfo[]>;
   postHomeInfo(userPk: number, Info: homeInfo): Promise<number>;
-  deleteHome(homeId: number): Promise<number>;
+  deletepastHome(homeId: number): Promise<number>;
 }
 interface pastHomeServiceDeps {
   db: Database;
 }
 interface homeInfo {
   homeId2: number;
+  startDate: number;
+  endDate: number;
+}
+
+interface listInfo {
+  homeId2: number;
+  name?: string;
   startDate: number;
   endDate: number;
 }
@@ -23,10 +30,13 @@ export function createPastHomeService({ db }: pastHomeServiceDeps): pastHomeServ
         .where("userPk", "=", userPk)
         .execute();
 
-      const list: homeInfo[] = [];
+      const list: listInfo[] = [];
       for (const s of ret) {
+        const name = await db.selectFrom("Home").select(["name"]).where("homeId", "=", s.homeId2).executeTakeFirst();
+
         const tmp = {
           homeId2: s.homeId2,
+          name: name?.name,
           startDate: s.startDate,
           endDate: s.endDate,
         };
@@ -46,7 +56,7 @@ export function createPastHomeService({ db }: pastHomeServiceDeps): pastHomeServ
         .executeTakeFirst();
       return Number(postedHome.insertId);
     },
-    async deleteHome(id) {
+    async deletepastHome(id) {
       const deletedHome = await db.deleteFrom("PastHome").where("homeId2", "=", id).executeTakeFirst();
       return Number(deletedHome.numDeletedRows);
     },

@@ -5,7 +5,7 @@ export interface TodoService {
   postTodo(userPk: number, todoInfo: todoList): Promise<number>;
   deleteTodo(todoId: number): Promise<number>;
   updateTodo(todoInfo: updateTodoList): Promise<number>;
-  getTodouserPk(todoId: number): Promise<number>;
+  getTodouserPk(todoId: number): Promise<number | undefined>;
 }
 
 interface TodoServiceDeps {
@@ -56,6 +56,9 @@ export function createTodoService({ db }: TodoServiceDeps): TodoService {
     },
     async getTodouserPk(todoId) {
       const ret = await db.selectFrom("Todo").select("userPk").where("todoId", "=", todoId).execute();
+      if (ret[0] == undefined) {
+        return undefined;
+      }
       return ret[0].userPk;
     },
     async postTodo(userPk, todoInfo) {

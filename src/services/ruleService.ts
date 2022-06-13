@@ -2,7 +2,8 @@ import { Database } from "../db";
 
 export interface ruleService {
   getRuleList(homeId: number): Promise<ruleInfo[]>;
-  postRule(info: ruleInfo): Promise<number>;
+  getRuleInfo(ruleId: number): Promise<number>;
+  postRule(homeId: number, info: postruleInfo): Promise<number>;
   updateRule(info: updateRuleInfo): Promise<number>;
   deleteRule(ruleId: number): Promise<number>;
 }
@@ -18,9 +19,13 @@ export interface ruleInfo {
   rulecateId?: number | null;
 }
 
+export interface postruleInfo {
+  content: string;
+  rulecateId?: number | null;
+}
+
 export interface updateRuleInfo {
   ruleId: number;
-  homeId?: number;
   content?: string;
   rulecateId?: number | null;
 }
@@ -46,14 +51,19 @@ export function createRuleService({ db }: ruleServiceDeps): ruleService {
       }
       return list;
     },
-    async postRule(info) {
+    async getRuleInfo(ruleId) {
+      const ret = await db.selectFrom("Rule").select(["homeId"]).where("ruleId", "=", ruleId).execute();
+
+      return ret[0].homeId;
+    },
+    async postRule(homeId, info) {
       if (info.rulecateId === 0 || info.rulecateId === undefined) {
         info.rulecateId = null;
       }
       const postRuleId = await db
         .insertInto("Rule")
         .values({
-          homeId: info.homeId,
+          homeId: homeId,
           content: info.content,
           rulecateId: info.rulecateId,
         })
@@ -69,7 +79,6 @@ export function createRuleService({ db }: ruleServiceDeps): ruleService {
       const updatedRow = await db
         .updateTable("Rule")
         .set({
-          homeId: info.homeId,
           content: info.content,
           rulecateId: info.rulecateId,
         })
