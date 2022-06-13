@@ -10,7 +10,7 @@ interface UserServiceDeps {
   db: Database;
 }
 interface UserInfo {
-  HomeId?: number;
+  HomeId?: number | null;
   gender?: string;
   nickname?: string;
 }

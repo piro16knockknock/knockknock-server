@@ -81,7 +81,7 @@ CREATE TABLE Rule
     `ruleId`   INT NOT NULL AUTO_INCREMENT,
     `homeId`   INT NOT NULL,
     `content`   VARCHAR(50) NOT NULL,
-    `rulecateId`   INT NOT NULL,
+    `rulecateId`   INT,
     PRIMARY KEY (`ruleId`),
     FOREIGN KEY (`rulecateId`) REFERENCES `Rulecategory` (`rulecateId`)
 );

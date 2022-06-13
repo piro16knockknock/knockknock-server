@@ -12,7 +12,7 @@ interface HomeServiceDeps {
   db: Database;
 }
 interface HomeInfo {
-  Homeid?: number;
+  HomeId?: number;
   name: string;
   rentDate?: number;
   rentMonth?: number;

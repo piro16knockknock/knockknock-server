@@ -23,7 +23,7 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
       }
 
       const List = await TodoService.getTodoList(userPk);
-      if (List == undefined) {
+      if (List.length === 0) {
         res.json({ message: "조회할 리스트가 없어요" });
         return;
       }
@@ -36,18 +36,17 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     "/posttodo",
     loginRequired(),
     asyncRoute(async (req, res) => {
-      console.log(req.body);
+      const userPk = getUserId(req).userPk;
+
       const validator = zod.object({
         todoContent: zod.string(),
         date: zod.number(),
         cateId: zod.number().optional(),
-        userPk: zod.number(),
         isCompleted: zod.boolean(),
       });
-      //카테고리 아이디가 없어서 추가를 못하는중
       const todoInfo = validator.parse(req.body);
 
-      const todoId = await TodoService.postTodo(todoInfo);
+      const todoId = await TodoService.postTodo(userPk, todoInfo);
 
       if (todoId == undefined) {
         res.json({ message: "할일 추가를 실패했어요" });
@@ -62,16 +61,22 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
     "/updatetodo",
     loginRequired(),
     asyncRoute(async (req, res) => {
+      const userPk = getUserId(req).userPk;
+
       const validator = zod.object({
         todoId: zod.number(),
         todoContent: zod.string().optional(),
         date: zod.number().optional(),
         cateId: zod.number().optional(),
-        userPk: zod.number().optional(),
         isCompleted: zod.boolean().optional(),
       });
-
       const updateInfo = validator.parse(req.body);
+      const todoUserPk = await TodoService.getTodouserPk(updateInfo.todoId);
+      if (userPk != todoUserPk) {
+        res.json({ message: "내 할일이 아니라 삭제할 권한이 없어요" });
+        return;
+      }
+
       const rownum = await TodoService.updateTodo(updateInfo);
       if (rownum == undefined) {
         res.json({ message: "할일 업데이트에 실패했어요" });
@@ -84,13 +89,24 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
   );
 
   router.delete(
-    "/deltetodo",
+    "/deletetodo/:todoId",
     loginRequired(),
     asyncRoute(async (req, res) => {
-      const validator = zod.number();
-      const todoId = validator.parse(req.body.todoId);
-      const rownum = await TodoService.deleteTodo(todoId);
+      const userPk = getUserId(req).userPk;
+      const todoId = Number(req.params.todoId);
+      if (todoId === undefined) {
+        res.json({ message: "삭제할 할일의 아이디를 불러오지 못했어요" });
+        return;
+      }
+      const todoUserPk = await TodoService.getTodouserPk(todoId);
+      console.log(todoUserPk, userPk);
+      if (userPk != todoUserPk) {
+        res.json({ message: "내 할일이 아니라 삭제할 권한이 없어요" });
+        return;
+      }
 
+      const rownum = await TodoService.deleteTodo(todoId);
+      // TODO : todo의 주인이 지금 로그인된 유저가 아니라면 컷 ** 업데이트도 체크해야함
       if (rownum == undefined) {
         res.json({ message: "할일 삭제에 실패했어요" });
         return;
@@ -172,21 +188,18 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *                   message:
  *                     type: string
  *                     example: "?번째 row가 변경 되었습니다."
- *   /todo/deltetodo:
+ *   /todo/deletetodo/{todoId}:
  *     delete:
  *       tags:
  *       - "todo"
  *       description: "할일 삭제"
  *       security:
  *         - jwt: []
- *       requestBody:
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 todoId:
- *                   type: number
+ *       parameters:
+ *       - name: "todoId"
+ *         in: "path"
+ *         required: true
+ *         type: "number"
  *
  *       responses:
  *         "200":
@@ -215,8 +228,6 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *         example: "20220601"
  *       cateId:
  *         type: number
- *       userPk:
- *         type: number
  *       isCompleted:
  *         type: boolean
  *   posttodoInfo:
@@ -228,8 +239,6 @@ export function createTodoRoute({ TodoService }: CreateTodoRoutesDeps) {
  *         type: number
  *         example: "20220601"
  *       cateId:
- *         type: number
- *       userPk:
  *         type: number
  *       isCompleted:
  *         type: boolean
