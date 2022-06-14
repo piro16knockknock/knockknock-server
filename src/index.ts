@@ -18,7 +18,7 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT}/api/v1`,
+        url: `http://3.39.9.190:${process.env.PORT}/api/v1`,
       },
     ],
     securityDefinitions: {
@@ -49,7 +49,7 @@ async function main() {
   app.use("/api/v1", createRoutes({ services }));
 
   app.listen(PORT, () => {
-    console.log(`Server Started: (http://localhost:${PORT})`);
+    console.log(`Server Started: (http://3.39.9.190:${PORT})`);
   });
 }
 
