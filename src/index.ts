@@ -36,7 +36,7 @@ const openapiSpecification = swaggerJsdoc(options);
 async function main() {
   const app = express();
 
-  const db = createDatabase({ DATABASE_URI });
+  const db = createDatabase();
   const services = createServices({ db });
 
   app.use(express.json());
