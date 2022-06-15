@@ -7,7 +7,7 @@ import type { Database } from "../db";
 const SALTROUNDS = 11;
 
 export interface LoginService {
-  isLogin(id: string, password: string): Promise<string | null>;
+  isLogin(id: string, password: string): Promise<isLoginInfo | null>;
   isJoin(joinPayload: joinPayload): Promise<number | null>;
 }
 
@@ -17,6 +17,10 @@ export interface joinPayload {
   name: string;
   gender?: string;
   nickname?: string;
+}
+export interface isLoginInfo {
+  accessToken: string;
+  userPk: number;
 }
 
 interface loginServiceDeps {
@@ -34,8 +38,13 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
           id: id,
           name: ret[0].name,
         };
+        console.log(ret[0].userPk);
         const accessToken = jwt.sign(payload, PRIVATEKEY);
-        return accessToken;
+        const withAccessToken: isLoginInfo = {
+          accessToken: accessToken,
+          userPk: ret[0].userPk,
+        };
+        return withAccessToken;
       }
       return null;
     },

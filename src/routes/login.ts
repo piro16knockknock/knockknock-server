@@ -1,13 +1,17 @@
 import express from "express";
 
+import { HomeService } from "../services/HomeService";
 import { joinPayload, LoginService } from "../services/loginService";
+import { UserService } from "../services/userService";
 import { asyncRoute } from "../utils/route";
 
 export interface CreateLoginRouteDeps {
   loginService: LoginService;
+  homeService: HomeService;
+  userService: UserService;
 }
 
-export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
+export function createLoginRoute({ loginService, homeService, userService }: CreateLoginRouteDeps) {
   const router = express.Router();
 
   /**
@@ -26,11 +30,10 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
    *       responses:
    *         "200":
    *           description: 로그인 성공
-   *           schema:
-   *             type: object
-   *             properties:
-   *               accessToken:
-   *                 type: "string"
+   *           content:
+   *             application/json:
+   *               schema:
+   *               $ref: "#definitions/isloginInfo"
    *   /login/join:
    *     post:
    *       tags:
@@ -74,6 +77,16 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
    *         type: "string"
    *       password:
    *         type: "string"
+   *
+   *   isloginInfo:
+   *     type: object
+   *     properties:
+   *       accessToken:
+   *         type: "string"
+   *       userNickname:
+   *         type: "string"
+   *       homeName:
+   *         type: "string"
    */
   router.post(
     "/login",
@@ -82,7 +95,27 @@ export function createLoginRoute({ loginService }: CreateLoginRouteDeps) {
       const password = req.body.password;
       console.log(req.body);
       const token = await loginService.isLogin(id, password);
-      res.json({ accessToken: token });
+      //토큰으로 getUserId 하고 그 아이디를 바탕으로 집 정보 요청하기
+      const userPk = token?.userPk;
+      console.log(userPk);
+      if (userPk === undefined) {
+        res.json({ message: "userPk를 불러오지 못했어요" });
+        return;
+      }
+      const userInfo = await userService.getUserInfo(userPk);
+
+      const userHome = await userService.getUserInfo(userPk);
+      if (userHome?.HomeId === undefined || userHome.HomeId === null) {
+        res.json({ message: "등록된 집이 없어요. 집을 먼저등록하세요" });
+        return;
+      }
+      const homeInfo = await homeService.getHomeInfo(userHome.HomeId);
+
+      res.json({
+        accessToken: token?.accessToken,
+        userNickname: userInfo?.nickname,
+        homeName: homeInfo.name,
+      });
       return;
     }),
   );
