@@ -24,7 +24,7 @@ export interface User {
   HomeId?: number | null;
   name: string;
   gender?: string;
-  nickname: string;
+  nickname?: string;
 }
 
 export interface Home {

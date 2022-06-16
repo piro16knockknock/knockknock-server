@@ -95,6 +95,12 @@ export function createLoginRoute({ loginService, homeService, userService }: Cre
       const password = req.body.password;
       console.log(req.body);
       const token = await loginService.isLogin(id, password);
+      console.log(token);
+      //토큰없으면 로그인 안된거니까 401로 에러출력하기
+      if (token === null) {
+        res.json({ message: "로그인실패 토큰이 없어요" });
+        return;
+      }
       //토큰으로 getUserId 하고 그 아이디를 바탕으로 집 정보 요청하기
       const userPk = token?.userPk;
       console.log(userPk);
@@ -106,15 +112,18 @@ export function createLoginRoute({ loginService, homeService, userService }: Cre
 
       const userHome = await userService.getUserInfo(userPk);
       if (userHome?.HomeId === undefined || userHome.HomeId === null) {
-        res.json({ message: "등록된 집이 없어요. 집을 먼저등록하세요" });
+        res.json({
+          accessToken: token?.accessToken,
+          userNickname: userInfo?.nickname,
+          homeName: "",
+        });
         return;
       }
-      const homeInfo = await homeService.getHomeInfo(userHome.HomeId);
-
+      const homeName = await homeService.getHomeInfo(userHome.HomeId);
       res.json({
         accessToken: token?.accessToken,
         userNickname: userInfo?.nickname,
-        homeName: homeInfo.name,
+        homeName: homeName.name,
       });
       return;
     }),
