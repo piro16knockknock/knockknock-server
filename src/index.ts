@@ -4,7 +4,7 @@ import morgan from "morgan";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
-import { DATABASE_URI, PORT } from "./const";
+import { PORT } from "./const";
 import { createDatabase } from "./db";
 import { createRoutes } from "./routes";
 import { createServices } from "./services";
@@ -18,7 +18,7 @@ const options = {
     },
     servers: [
       {
-        url: `http://3.39.9.190:${process.env.PORT}/api/v1`,
+        url: `http://3.39.9.190:${PORT}/api/v1`,
       },
     ],
     securityDefinitions: {

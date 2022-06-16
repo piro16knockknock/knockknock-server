@@ -31,7 +31,9 @@ export function createLoginService({ db }: loginServiceDeps): LoginService {
   return {
     async isLogin(id, password) {
       const ret = await db.selectFrom("user").select(["userPk", "name", "password"]).where("userId", "=", id).execute();
-
+      if (ret.length === 0) {
+        return null;
+      }
       if (bcrypt.compareSync(password, ret[0].password)) {
         const payload = {
           userPk: ret[0].userPk,
