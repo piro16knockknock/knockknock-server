@@ -111,8 +111,9 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
     loginRequired(),
     asyncRoute(async (req, res) => {
       const userId = getUserId(req);
-      const userInfo = userService.getUserInfo(userId.userPk);
+      const userInfo = await userService.getUserInfo(userId.userPk);
       res.json(userInfo);
+      return;
     }),
   );
   router.post(
@@ -121,7 +122,7 @@ export function createUserRoute({ userService }: CreateUserRouteDeps) {
     asyncRoute(async (req, res) => {
       const userpk = getUserId(req).userPk;
       const info = req.body.userInfo;
-      const Row = userService.setUserInfo(userpk, info);
+      const Row = await userService.setUserInfo(userpk, info);
       res.json({ updatedRow: Row });
       return;
     }),
