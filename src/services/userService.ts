@@ -24,7 +24,6 @@ export function createUserService({ db }: UserServiceDeps): UserService {
         .where("userPk", "=", userPk)
         .execute();
 
-      console.log(ret);
       if (ret.length === 0) {
         return null;
       }

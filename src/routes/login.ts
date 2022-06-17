@@ -103,15 +103,13 @@ export function createLoginRoute({ loginService, homeService, userService }: Cre
       }
       //토큰으로 getUserId 하고 그 아이디를 바탕으로 집 정보 요청하기
       const userPk = token?.userPk;
-      console.log(userPk);
       if (userPk === undefined) {
         res.json({ message: "userPk를 불러오지 못했어요" });
         return;
       }
       const userInfo = await userService.getUserInfo(userPk);
 
-      const userHome = await userService.getUserInfo(userPk);
-      if (userHome?.HomeId === undefined || userHome.HomeId === null) {
+      if (userInfo?.HomeId === undefined || userInfo.HomeId === null) {
         res.json({
           accessToken: token?.accessToken,
           userNickname: userInfo?.nickname,
@@ -119,7 +117,7 @@ export function createLoginRoute({ loginService, homeService, userService }: Cre
         });
         return;
       }
-      const homeName = await homeService.getHomeInfo(userHome.HomeId);
+      const homeName = await homeService.getHomeInfo(userInfo.HomeId);
       res.json({
         accessToken: token?.accessToken,
         userNickname: userInfo?.nickname,
